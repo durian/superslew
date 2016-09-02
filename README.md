@@ -40,3 +40,6 @@ the joystick input values, altitude, and geographical position.
 
 - Can be enabled "in flight" which sometimes causes spectacular effects
   when disabled again.
+
+- The orientation of the plane is fixed, which may cause problems when
+  moving very large distances.
