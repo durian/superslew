@@ -18,7 +18,6 @@
 #include "Global.h"
 #include "Log.h"
 #include "dataref.h"
-#include "sha256.h"
 #include "float_window.h"
 
 namespace SUPERSLEW {
