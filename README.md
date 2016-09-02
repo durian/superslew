@@ -4,6 +4,9 @@ Slew/ground control plugin for X-Plane 10
 - Move your plane around. Joystick moves forwards/backwards or sideways, throttle
 controls speed. The yaw control rotates the plane.
 
+- The slow speed setting can be used to park or push back your plane. The faster
+settings let you explore th scenery around you as well.
+
 - The plane is kept on the ground, even across hills, but be careful
   if you end up partly in the ground; you will "crash" when you disable
   the SuperSlew mode.
