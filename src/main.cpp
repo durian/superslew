@@ -313,7 +313,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
 
   // First we put a new menu item into the plugin menu
   mySubMenuItem = XPLMAppendMenuItem(XPLMFindPluginsMenu(), // Plugins menu 
-				     "Superslew", // Menu title
+				     "SuperSlew", // Menu title
 				     0,  // Item ref
 				     1); // English 
 
