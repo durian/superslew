@@ -88,6 +88,8 @@ float maxi_mult = 16.0 * mini_mult; // 16*8 = 128 = ~256 kt
 float warp_mult =  4.0 * maxi_mult; // 4 * 256 = ~ 1024 kt
 float mult = mini_mult;
 
+float yaw_reverse = 1.0; // set to -1.0 to reverse.
+
 DataRef<std::vector<int>> dr_override_planepath("sim/operation/override/override_planepath", ReadWrite); // ARRAY?
 
 DataRef<double> dr_plane_lx("sim/flightmodel/position/local_x", ReadWrite);
@@ -113,7 +115,7 @@ FloatWindow *infow2 = nullptr;
 XPLMMenuID	myMenu;
 int		mySubMenuItem;
 
-enum gpxlog_status {MENU_TOGGLE, MENU_TOGGLE_ALTMODE, MENU_SCAN, MENU_NORMAL, MENU_SPEED, MENU_WARP};
+enum gpxlog_status {MENU_TOGGLE, MENU_TOGGLE_ALTMODE, MENU_SCAN, MENU_YAWREVERSE, MENU_NORMAL, MENU_SPEED, MENU_WARP};
 
 extern const intptr_t MSG_END_SLEWMODE; //from float_window.h
 
@@ -332,6 +334,8 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
     XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ALTMODE, xplm_Menu_Unchecked);
   }
   XPLMAppendMenuItem(myMenu, "Scan Joysticks",  (void*)MENU_SCAN, 1);
+  XPLMAppendMenuItem(myMenu, "Reverse yaw",  (void*)MENU_YAWREVERSE, 1);
+  XPLMCheckMenuItem(myMenu, MENU_YAWREVERSE, xplm_Menu_Unchecked);
   XPLMAppendMenuItem(myMenu, "Times    1",  (void*)MENU_NORMAL, 1);  // 1 = mini_mult
   std::string tmp = "Times  "+std::to_string(int(maxi_mult / mini_mult));
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_SPEED, 1);   // maxi_mult / mini_mult
@@ -466,6 +470,15 @@ void MyMenuHandlerCallback( void *inMenuRef, void *inItemRef) {
   if ( (long)inItemRef == MENU_SCAN ) {
     scan_joy();
   }
+  if ( (long)inItemRef == MENU_YAWREVERSE ) {
+    if ( yaw_reverse < 0 ) {
+      yaw_reverse = 1.0;
+      XPLMCheckMenuItem(myMenu, MENU_YAWREVERSE, xplm_Menu_Unchecked);
+    } else {
+      yaw_reverse = -1.0;
+      XPLMCheckMenuItem(myMenu, MENU_YAWREVERSE, xplm_Menu_Checked);
+    }
+  }
   if ( (long)inItemRef == MENU_NORMAL ) {
     mult = mini_mult;
     XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Checked);
@@ -598,9 +611,9 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
     dr_plane_ly = h + reference_h; // underground fix  / BUT PROBLEM WHEN STARTING AT ALT, cannot go below
   }
 
-  // heading
+  // heading, we need a "reverse" option here.
   float h_norm = hdng - 0.50;
-  float h_inc = h_norm * 0.1 * mini_mult; // not too fast
+  float h_inc = h_norm * 0.1 * mini_mult * yaw_reverse; // not too fast
   
   if ( fabs(h_norm) > 0.1 ) {
     ypr.psi += h_inc; // add 1 degree
