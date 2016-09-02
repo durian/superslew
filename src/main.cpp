@@ -347,12 +347,12 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   
   XPLMRegisterFlightLoopCallback(DeferredInitNewAircraftFLCB, -1, NULL);
 
-  std::string tmp0 = " Ground Control ";
+  std::string tmp0 = " Super Slew ";
   infow = G.create_fw("01", "", tmp0, "");//, 40, 600); // use updateText
   infow->hideWindow();
   //infow2 = G.create_fw("02", "", "PB", "");//, 40, 600);
 
-  SlewCommand = XPLMCreateCommand("durian/groundcontrol/control", "Toggle Ground Control");
+  SlewCommand = XPLMCreateCommand("durian/superslew/toggle", "Toggle SuperSlew");
   XPLMRegisterCommandHandler(SlewCommand,        // in Command name
 			     SlewCommandHandler, // in Handler
 			     0,                  // Receive input before plugin windows. (or 1?)
