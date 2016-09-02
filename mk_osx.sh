@@ -4,5 +4,5 @@ cd ${BUILD}
 cmake ..
 make
 cd ..
-echo cp bin/groundcontrol/mac.xpl ~/xplanec/Resources/plugins/groundcontrol/
+echo cp bin/superslew/mac.xpl ~/xplanec/Resources/plugins/superslew/
 
