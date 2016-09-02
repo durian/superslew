@@ -11,10 +11,17 @@ controls speed. The yaw control rotates the plane.
 - If you enable altitude mode, joystick right/left moves plane
 up/down. You can not go below your starting altitude.
 
-- There are three speeds to choose from.
+- There are three speeds to choose from. The first one has a maximum
+  speed of 8 m/s. The second setting has a maximum speed of 128 m/s,
+  and the third one has a maximu speed of 512 m/s. The latter
+  corresponds to almost 1000 knots. Maximum speed is reached with
+  maximum trottle.
 
 - Shows a dialog box in the lower right corner when enabled, showing
 the joystick input values, altitude, and geographical position.
+
+- Defines a custom command called durian/superslew/toggle which can be
+  bound to a key or joystick button.
 
 - You may need to move your controls a bit before enabling SuperSlew.
 
