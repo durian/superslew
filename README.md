@@ -20,6 +20,9 @@ up/down. You can not go below your starting altitude.
   corresponds to almost 1000 knots. Maximum speed is reached with
   maximum trottle.
 
+- if you move really fast you may get ahead of the scenery loading,
+but it usually fixes itself when you wait a bit.
+
 - Shows a dialog box in the lower right corner when enabled, showing
 the joystick input values, altitude, and geographical position.
 
