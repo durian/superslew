@@ -15,3 +15,12 @@ up/down. You can not go below your starting altitude.
 
 - Shows a dialog box in the lower right corner when enabled, showing
 the joystick input values, altitude, and geographical position.
+
+- You may need to move your controls a bit before enabling SuperSlew.
+
+- It may not parse your joysticks properly if you have had different
+  controls connected at different times. X-Plane seems to leave traces
+  in the configuration files confusing SuperSlew. The only cure is to
+  throw away your preferences and configure them again.
+
+- Only tested with a simple Saitek joystick and CH Products pedals.
