@@ -38,5 +38,5 @@ the joystick input values, altitude, and geographical position.
 
 - Only tested with a simple Saitek joystick and CH Products pedals.
 
-- Can be enabled "in flight", but sometimes causes spectacular effects
+- Can be enabled "in flight" which sometimes causes spectacular effects
   when disabled again.
