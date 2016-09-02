@@ -13,5 +13,5 @@ up/down. You can not go below your starting altitude.
 
 - There are three speeds to choose from.
 
-- Shows a dialog box in the lower right corner when enables, showing
+- Shows a dialog box in the lower right corner when enabled, showing
 the joystick input values, altitude, and geographical position.
