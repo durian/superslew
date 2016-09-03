@@ -82,6 +82,7 @@ Axis axis_t = {0, 0, 0}; // throttle
 
 static bool slewmode = false;
 static bool altmode = false;
+static bool orimode = false; // orientation
 
 float mini_mult =  8.0; // this is m/s, at max throttle
 float maxi_mult = 16.0 * mini_mult; // 16*8 = 128 = ~256 kt
@@ -115,7 +116,7 @@ FloatWindow *infow2 = nullptr;
 XPLMMenuID	myMenu;
 int		mySubMenuItem;
 
-enum gpxlog_status {MENU_TOGGLE, MENU_TOGGLE_ALTMODE, MENU_SCAN, MENU_YAWREVERSE, MENU_NORMAL, MENU_SPEED, MENU_WARP};
+enum gpxlog_status {MENU_TOGGLE, MENU_TOGGLE_ALTMODE, MENU_TOGGLE_ORIMODE, MENU_SCAN, MENU_YAWREVERSE, MENU_NORMAL, MENU_SPEED, MENU_WARP};
 
 extern const intptr_t MSG_END_SLEWMODE; //from float_window.h
 
@@ -327,12 +328,20 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
 
   XPLMAppendMenuItem(myMenu, "Toggle Slew Mode",  (void*)MENU_TOGGLE, 1);
   XPLMCheckMenuItem(myMenu, MENU_TOGGLE, xplm_Menu_Unchecked);
+
   XPLMAppendMenuItem(myMenu, "Toggle Altitude Control",  (void*)MENU_TOGGLE_ALTMODE, 1);
   if ( altmode ) {
     XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ALTMODE, xplm_Menu_Checked);
   } else {
     XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ALTMODE, xplm_Menu_Unchecked);
   }
+  XPLMAppendMenuItem(myMenu, "Toggle Orientation Control",  (void*)MENU_TOGGLE_ORIMODE, 1);
+  if ( orimode ) {
+    XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ORIMODE, xplm_Menu_Checked);
+  } else {
+    XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ORIMODE, xplm_Menu_Unchecked);
+  }
+
   XPLMAppendMenuItem(myMenu, "Scan Joysticks",  (void*)MENU_SCAN, 1);
   XPLMAppendMenuItem(myMenu, "Reverse yaw",  (void*)MENU_YAWREVERSE, 1);
   XPLMCheckMenuItem(myMenu, MENU_YAWREVERSE, xplm_Menu_Unchecked);
@@ -467,6 +476,14 @@ void MyMenuHandlerCallback( void *inMenuRef, void *inItemRef) {
       XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ALTMODE, xplm_Menu_Unchecked);
     }
   }
+  if ( (long)inItemRef == MENU_TOGGLE_ORIMODE ) {
+    orimode = ! orimode; 
+    if ( orimode ) {
+      XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ORIMODE, xplm_Menu_Checked);
+    } else {
+      XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ORIMODE, xplm_Menu_Unchecked);
+    }
+  }
   if ( (long)inItemRef == MENU_SCAN ) {
     scan_joy();
   }
@@ -566,14 +583,14 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
 
   float inc = thro * mult * elapsed;
   
-
   // fromthe two incs, we can calculate speed, we are at "0,0" now, and go to
   //  inc *  sin(psi * (M_PI/180.0)), inc * -cos(psi * (M_PI/180.0))
   // or even,
   // inc is thro*mult, this is meters, speed is inc/elapsed in m/s
 
   float spd = 0.0;
-  
+
+  if ( ! orimode ) {
   // 0.00 .. 0.50 .. 1.00 
   if ( ptch > 0.70 ) { // why is positive 0.5 pulling stick back?
     dr_plane_lx = dr_plane_lx - inc *  sin(psi * (M_PI/180.0));
@@ -610,11 +627,13 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
   } else if ( dr_plane_ly - reference_h < h ) {
     dr_plane_ly = h + reference_h; // underground fix  / BUT PROBLEM WHEN STARTING AT ALT, cannot go below
   }
-
+  }
+  
   // heading, we need a "reverse" option here.
   float h_norm = hdng - 0.50;
   float h_inc = h_norm * 0.1 * mini_mult * yaw_reverse; // not too fast
-  
+
+  // HEADING works the same in both modes
   if ( fabs(h_norm) > 0.1 ) {
     ypr.psi += h_inc; // add 1 degree
     //std::string m = "*si="+std::to_string(ypr.psi)+","+"the="+std::to_string(ypr.the)+","+"phi="+std::to_string(ypr.phi)+"\n";
@@ -627,15 +646,54 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
     dr_plane_psi = fmod(psi + h_inc, 360.0);
   }
 
+  if ( orimode ) {
+    h_inc = thro; // 0..1
+    
+    ypr = {0, 0, 0};
+    QuaternionToEulers(q, ypr);
+    
+    // Add another mode where we change pitch and roll with joystick, adjust Q like above with heading.
+    if ( roll > 0.70 ) {
+      ypr.phi += h_inc; 
+      EulersToQuaternion(ypr, q); // convert back
+      dr_plane_q = {static_cast<float>(q.w), static_cast<float>(q.x), static_cast<float>(q.y), static_cast<float>(q.z)};
+      dr_plane_phi = phi + h_inc; //fmod(phi + h_inc, 360.0);
+    } else if ( roll < 0.30 ) {
+      ypr.phi -= h_inc; 
+      EulersToQuaternion(ypr, q); // convert back
+      dr_plane_q = {static_cast<float>(q.w), static_cast<float>(q.x), static_cast<float>(q.y), static_cast<float>(q.z)};
+      dr_plane_phi = phi - h_inc; //fmod(phi - h_inc, 360.0);
+    }
+    //
+    if ( ptch > 0.70 ) { 
+      ypr.the += h_inc; 
+      EulersToQuaternion(ypr, q); // convert back
+      dr_plane_q = {static_cast<float>(q.w), static_cast<float>(q.x), static_cast<float>(q.y), static_cast<float>(q.z)};
+      dr_plane_the = the + h_inc;// fmod(the + h_inc, 360.0);
+    } // and now backwards
+    else if ( ptch < 0.30 ) {
+      ypr.the -= h_inc; 
+      EulersToQuaternion(ypr, q); // convert back
+      dr_plane_q = {static_cast<float>(q.w), static_cast<float>(q.x), static_cast<float>(q.y), static_cast<float>(q.z)};
+      dr_plane_the = the - h_inc; //fmod(the - h_inc, 360.0);
+    }
+  }
+  
   std::string av = "ptch="+rounded(ptch)+", "+"roll="+rounded(roll)+", "+"hdng="+rounded(hdng)+", "+"thro="+rounded(thro)+"\n";
   infow->updateText( av );
   av = "agl="+rounded(dr_plane_y_agl)+", "+"plane_ly="+rounded(dr_plane_ly)+", h_offset="+rounded(reference_h);//+"\n";
   infow->updateText1( av );
 
-  std::string latlon = rounded6(dr_plane_lat)+" "+rounded6(dr_plane_lon);
-  if ( altmode ) {
-    latlon += " ALT";
+  std::string latlon;
+  if ( ! orimode ) {
+    latlon = rounded6(dr_plane_lat)+" "+rounded6(dr_plane_lon);
+    if ( altmode ) {
+      latlon += " ALT";
+    }
+  } else {
+    latlon = "psi="+rounded(dr_plane_psi)+" phi="+rounded(dr_plane_phi)+" the="+rounded(dr_plane_the)+" ORI";
   }
+
   latlon += " x"+std::to_string(int(mult/mini_mult));
   latlon += " "+std::to_string(int(dr_plane_psi)); // true_psi?
   latlon += " "+std::to_string(int(spd*1.94384))+" kt";
