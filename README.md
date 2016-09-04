@@ -1,15 +1,15 @@
 # superslew
 Slew/ground control plugin for X-Plane 10
 
-- Move your plane around. Joystick moves forwards/backwards or sideways, throttle
-controls speed. The yaw control rotates the plane.
+- Move your plane around. Joystick moves forwards/backwards or
+sideways, throttle controls speed. The yaw control rotates the plane.
 
-- The slow speed setting can be used to park or push back your plane. The faster
-settings lets you explore the scenery around you as well.
+- The slow speed setting can be used to park or push back your plane.
+The faster settings lets you explore the scenery around you as well.
 
 - The plane is kept on the ground, even across hills, but be careful
-  if you end up partly in the ground; you will "crash" when you disable
-  the SuperSlew mode.
+  if you end up partly in the ground; you will "crash" when you
+  disable the SuperSlew mode.
 
 - If you enable altitude mode, joystick right/left moves plane
 up/down. You can not go below your starting altitude (the altitude
@@ -24,20 +24,20 @@ when you enable the mode).
   corresponds to almost 1000 knots. Maximum speed is reached with
   maximum trottle.
 
-- Yaw control (controlling heading) is proportional to how far you move the pedals or twist
-the joystick. The speed of the other changes is proportional to the
-throttle. 
+- Yaw control (controlling heading) is proportional to how far you
+move the pedals or twist the joystick. The speed of the other changes
+is proportional to the throttle.
 
-- If you move really far and fast you may get ahead of the scenery loading,
-but it usually fixes itself when you wait a bit.
+- If you move really far and fast you may get ahead of the scenery
+loading, but it usually fixes itself when you wait a bit.
 
 - Shows a dialog box in the lower right corner when enabled, showing
 the joystick input values, altitude, and geographical position. In
 orientation mode, the psi, phi and theta values are shown instead of
 the geographical location.
 
-- Defines a custom command called `durian/superslew/toggle` which can be
-  bound to a key or joystick button.
+- Defines a custom command called `durian/superslew/toggle` which can
+  be bound to a key or joystick button.
 
 - You may need to move your controls a bit before enabling SuperSlew.
 
