@@ -110,8 +110,40 @@ DataRef<double>  dr_plane_lon("sim/flightmodel/position/longitude");
 
 DataRef<std::vector<float>> dr_plane_q("sim/flightmodel/position/q", ReadWrite);
 
+/*
+fside_prop	float	660+	yes	Newtons	force sideways by all engines on the ACF. Override with override_engines
+fnrml_prop	float	660+	yes	Newtons	force upward by all engines on the ACF. Override with override_engines Writable in v10 only
+faxil_prop	float	660+	yes	Newtons	force backward by all engines on the ACF (usually this is a negative number). 
+
+fside_total	float	1000+	yes	Newtons	total/ground forces - ACF X axis. Override with override_forces
+fnrml_total	float	1000+	yes	Newtons	Total/ground forces - ACF Y axis. Override with override_forces
+faxil_total	float	1000+	yes	Newtons	total/ground forces - ACF Z axis. Override with override_forces
+
+L_prop	float	1000+	yes	NM	The roll moment due to prop forces. Override with override_engines - positive = right roll.
+M_prop	float	1000+	yes	NM	The pitch moment due to prop forces. Override with override_engines - positive = pitch up.
+N_prop	float	1000+	yes	NM	The yaw moment due to prop forces. Override with override_engines - positive = yaw right/clockwise.
+
+// these?
+fside_plug_acf	float	1030+	yes	Newtons	Extra plugin-provided sideways force (ACF X axis, positive pushes airplane to the right). ADD to this dataref to apply extra force.
+fnrml_plug_acf	float	1030+	yes	Newtons	Extra plugin-provided upward force (ACF Y axis, positive pushes airplane up). ADD to this dataref to apply extra force.
+faxil_plug_acf	float	1030+	yes	Newtons	Extra plugin-provided forward force. (ACF Z axis, positive pushes airplane backward). ADD to this dataref to apply extra force.
+L_plug_acf	float	1030+	yes	NM	Extra plugin-provided roll moment - ADD to this dataref to apply extra force - positive = right roll.
+M_plug_acf	float	1030+	yes	NM	Extra plugin-provided pitch moment - ADD to this dataref to apply extra force - positive = pitch up.
+N_plug_acf	float	1030+	yes	NM	Extra plugin-provided yaw moment - ADD to this dataref to apply extra force - positive = yaw right/clockwise.
+
+// sim/operation/override/
+override_joystick	int	660+	yes	boolean	Override control of the joystick deflections (overrides stick, yoke, pedals, keys, mouse, and auto-coordination)
+override_artstab	int	660+	yes	boolean	Override control of the artificial stability system
+override_flightcontrol	int	660+	yes	boolean	Override all parts of the flight system at once
+override_gearbrake	int	660+	yes	boolean	Override gear and brake status
+override_planepath	int[20]	660+	yes	boolean	Override position updates of this plane
+...
+override_engines	int	1000+	yes	boolean	overrides all engine calculations - write to LMN and g_nrml/side/axil.
+override_forces	int	1000+	yes	boolean	overrides all force calculations - write to LMN and g_nrml/side/axil.
+
+*/
+
 FloatWindow *infow = nullptr;
-FloatWindow *infow2 = nullptr;
 
 XPLMMenuID	myMenu;
 int		mySubMenuItem;
@@ -359,7 +391,6 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   std::string tmp0 = " Super Slew ";
   infow = G.create_fw("01", "", tmp0, "");//, 40, 600); // use updateText
   infow->hideWindow();
-  //infow2 = G.create_fw("02", "", "PB", "");//, 40, 600);
 
   SlewCommand = XPLMCreateCommand("durian/superslew/toggle", "Toggle SuperSlew");
   XPLMRegisterCommandHandler(SlewCommand,        // in Command name
