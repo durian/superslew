@@ -262,6 +262,11 @@ std::string rounded6(float number) {
   ss << std::fixed << std::setprecision(6) << number;
   return ss.str();
 }
+std::string padded_int(int i, int l) {
+  std::ostringstream ostr;
+  ostr << std::setfill(' ') << std::setw(l) << i;
+  return ostr.str();
+}
 
 void scan_joy() {
   for (int i = 0; i < 100; i++) {
@@ -377,11 +382,13 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   XPLMAppendMenuItem(myMenu, "Scan Joysticks",  (void*)MENU_SCAN, 1);
   XPLMAppendMenuItem(myMenu, "Reverse yaw",  (void*)MENU_YAWREVERSE, 1);
   XPLMCheckMenuItem(myMenu, MENU_YAWREVERSE, xplm_Menu_Unchecked);
-  XPLMAppendMenuItem(myMenu, "Times    1",  (void*)MENU_NORMAL, 1);  // 1 = mini_mult
-  std::string tmp = "Times  "+std::to_string(int(maxi_mult / mini_mult));
-  XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_SPEED, 1);   // maxi_mult / mini_mult
-  tmp = "Times  "+std::to_string(int(4.0 * maxi_mult / mini_mult));
-  XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_WARP, 1);    // 4 * maxi_mult / mini_mult
+
+  std::string tmp = "Maximum Speed "+padded_int(int(mini_mult), 6)+" m/s"; // 6 b/c space needs 2
+  XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_NORMAL, 1); 
+  tmp = "Maximum Speed "+padded_int(int(maxi_mult), 3)+" m/s";
+  XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_SPEED, 1); 
+  tmp = "Maximum Speed "+padded_int(int(4.0 * maxi_mult), 3)+" m/s";
+  XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_WARP, 1);
   XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Checked);
   XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Unchecked);
   XPLMCheckMenuItem(myMenu, MENU_WARP, xplm_Menu_Unchecked);
@@ -688,25 +695,25 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
       ypr.phi += h_inc; 
       EulersToQuaternion(ypr, q); // convert back
       dr_plane_q = {static_cast<float>(q.w), static_cast<float>(q.x), static_cast<float>(q.y), static_cast<float>(q.z)};
-      dr_plane_phi = phi + h_inc; //fmod(phi + h_inc, 360.0);
+      dr_plane_phi = fmod(phi + h_inc, 360.0);
     } else if ( roll < 0.30 ) {
       ypr.phi -= h_inc; 
       EulersToQuaternion(ypr, q); // convert back
       dr_plane_q = {static_cast<float>(q.w), static_cast<float>(q.x), static_cast<float>(q.y), static_cast<float>(q.z)};
-      dr_plane_phi = phi - h_inc; //fmod(phi - h_inc, 360.0);
+      dr_plane_phi = fmod(phi - h_inc, 360.0);
     }
     //
     if ( ptch > 0.70 ) { 
       ypr.the += h_inc; 
       EulersToQuaternion(ypr, q); // convert back
       dr_plane_q = {static_cast<float>(q.w), static_cast<float>(q.x), static_cast<float>(q.y), static_cast<float>(q.z)};
-      dr_plane_the = the + h_inc;// fmod(the + h_inc, 360.0);
+      dr_plane_the = fmod(the + h_inc, 360.0);
     } // and now backwards
     else if ( ptch < 0.30 ) {
       ypr.the -= h_inc; 
       EulersToQuaternion(ypr, q); // convert back
       dr_plane_q = {static_cast<float>(q.w), static_cast<float>(q.x), static_cast<float>(q.y), static_cast<float>(q.z)};
-      dr_plane_the = the - h_inc; //fmod(the - h_inc, 360.0);
+      dr_plane_the = fmod(the - h_inc, 360.0);
     }
   }
   
@@ -725,7 +732,7 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
     latlon = "psi="+rounded(dr_plane_psi)+" phi="+rounded(dr_plane_phi)+" the="+rounded(dr_plane_the)+" ORI";
   }
 
-  latlon += " x"+std::to_string(int(mult/mini_mult));
+  latlon += " m"+std::to_string(int(mult));
   latlon += " "+std::to_string(int(dr_plane_psi)); // true_psi?
   latlon += " "+std::to_string(int(spd*1.94384))+" kt";
   infow->updateText2( latlon );
