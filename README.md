@@ -10,8 +10,8 @@ Slew/ground control plugin for X-Plane 10
 
 - The plane is kept on the ground, even across hills, but be careful
   if you end up partly in the ground; you will "crash" when you
-  disable the SuperSlew mode. use the "orientation" mode to align your
-  plane to the terrain.
+  disable the SuperSlew mode. Use the "orientation" mode to align your
+  plane to the terrain in this case.
 
 - If you enable altitude mode, joystick right/left moves plane
   up/down. You can not go below your starting altitude (the altitude
@@ -35,8 +35,8 @@ Slew/ground control plugin for X-Plane 10
 
 - Shows a dialog box in the lower right corner when enabled, showing
   the joystick input values, altitude, and geographical position. In
-  orientation mode, the psi, phi and theta values are shown instead of
-  the geographical location.
+  orientation mode, the psi (heading), phi (roll) and theta (pitch)
+  values are shown instead of the geographical location.
 
 - Defines a custom command called `durian/superslew/toggle` which can
   be bound to a key or joystick button.
