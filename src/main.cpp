@@ -649,8 +649,8 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
   if ( orimode ) {
     h_inc = thro; // 0..1
     
-    ypr = {0, 0, 0};
-    QuaternionToEulers(q, ypr);
+    //ypr = {0, 0, 0};
+    //QuaternionToEulers(q, ypr);
     
     // Add another mode where we change pitch and roll with joystick, adjust Q like above with heading.
     if ( roll > 0.70 ) {
