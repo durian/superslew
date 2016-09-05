@@ -84,7 +84,7 @@ static bool slewmode = false;
 static bool altmode = false;
 static bool orimode = false; // orientation
 
-float mini_mult =  8.0; // this is m/s, at max throttle
+float mini_mult = 16.0; // this is m/s, at max throttle
 float maxi_mult = 16.0 * mini_mult; // 16*8 = 128 = ~256 kt
 float warp_mult =  4.0 * maxi_mult; // 4 * 256 = ~ 1024 kt
 float mult = mini_mult;
@@ -272,8 +272,14 @@ std::string rounded6(float number) {
 }
 std::string padded_int(int i, int l) {
   std::ostringstream ostr;
-  ostr << std::setfill(' ') << std::setw(l) << i;
-  return ostr.str();
+  std::string res;
+  ostr << i; // get number only, we need double spaces for menu
+  res = ostr.str();
+  if ( res.length() >= l ) {
+    return res;
+  }
+  int d = l - res.length();
+  return std::string(d*2, ' ') + res;
 }
 
 void scan_joy() {
@@ -391,11 +397,11 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   XPLMAppendMenuItem(myMenu, "Reverse yaw",  (void*)MENU_YAWREVERSE, 1);
   XPLMCheckMenuItem(myMenu, MENU_YAWREVERSE, xplm_Menu_Unchecked);
 
-  std::string tmp = "Maximum Speed "+padded_int(int(mini_mult), 6)+" m/s"; // 6 b/c space needs 2
+  std::string tmp = "Maximum Speed "+padded_int(int(mini_mult), 4)+" m/s"; // 6 b/c space needs 2
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_NORMAL, 1); 
-  tmp = "Maximum Speed "+padded_int(int(maxi_mult), 3)+" m/s";
+  tmp = "Maximum Speed "+padded_int(int(maxi_mult), 4)+" m/s";
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_SPEED, 1); 
-  tmp = "Maximum Speed "+padded_int(int(4.0 * maxi_mult), 3)+" m/s";
+  tmp = "Maximum Speed "+padded_int(int(4.0 * maxi_mult), 4)+" m/s";
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_WARP, 1);
   XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Checked);
   XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Unchecked);
@@ -443,6 +449,7 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, vo
   (void)inParam;
 
   lg.xplm("XPluginReceiveMessage "+std::to_string(inMessage)+"\n");
+  
   // define XPLM_MSG_PLANE_CRASHED 101   <-- should unload here!
   // define XPLM_MSG_PLANE_LOADED 102
   // define XPLM_MSG_AIRPORT_LOADED 103
@@ -470,8 +477,12 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, vo
   
   if ( inMessage == XPLM_MSG_AIRPORT_LOADED ) { // 103
     slew_disable();
+    reference_h = get_reference_h(0);
+    lg.xplm("reference_h="+rounded(reference_h)+"\n");
   }
   if ( inMessage == XPLM_MSG_LIVERY_LOADED ) { // 108
+    reference_h = get_reference_h(0);
+    lg.xplm("reference_h="+rounded(reference_h)+"\n");
   }
 
   if ( inMessage == MSG_END_SLEWMODE ) {
@@ -763,7 +774,7 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
     latlon = "psi="+rounded(dr_plane_psi)+" phi="+rounded(dr_plane_phi)+" the="+rounded(dr_plane_the)+" ORI";
   }
 
-  latlon += " m"+std::to_string(int(mult));
+  latlon += " M"+std::to_string(int(mult));
   latlon += " "+std::to_string(int(dr_plane_psi)); // true_psi?
   latlon += " "+std::to_string(int(spd*1.94384))+" kt";
   infow->updateText2( latlon );
