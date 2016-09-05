@@ -30,8 +30,10 @@ PLUGIN_API void XPluginReceiveMessage( XPLMPluginID, long, void *);
 void  MyMenuHandlerCallback(void *, void *);
 float DeferredInitNewAircraftFLCB(float, float, int, void*);
 float MyFlightLoopCallback(float, float, int,  void *);
-int   MyKeySniffer(char, XPLMKeyFlags, char, void *);
-
+float get_reference_h(float);
+bool stationary();
+void dead_stop();
+  
 // -------------------
 
 #endif

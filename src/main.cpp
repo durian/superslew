@@ -97,6 +97,14 @@ DataRef<double> dr_plane_lx("sim/flightmodel/position/local_x", ReadWrite);
 DataRef<double> dr_plane_ly("sim/flightmodel/position/local_y", ReadWrite);
 DataRef<double> dr_plane_lz("sim/flightmodel/position/local_z", ReadWrite);
 
+DataRef<float> dr_plane_vx("sim/flightmodel/position/local_vx", ReadWrite);
+DataRef<float> dr_plane_vy("sim/flightmodel/position/local_vy", ReadWrite);
+DataRef<float> dr_plane_vz("sim/flightmodel/position/local_vz", ReadWrite);
+
+DataRef<float> dr_plane_ax("sim/flightmodel/position/local_ax", ReadWrite);
+DataRef<float> dr_plane_ay("sim/flightmodel/position/local_ay", ReadWrite);
+DataRef<float> dr_plane_az("sim/flightmodel/position/local_az", ReadWrite);
+
 DataRef<float> dr_plane_y_agl("sim/flightmodel/position/y_agl");
 float reference_h = 0.0;
 
@@ -433,7 +441,8 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, vo
 
   (void)inFromWho;
   (void)inParam;
-  
+
+  lg.xplm("XPluginReceiveMessage "+std::to_string(inMessage)+"\n");
   // define XPLM_MSG_PLANE_CRASHED 101   <-- should unload here!
   // define XPLM_MSG_PLANE_LOADED 102
   // define XPLM_MSG_AIRPORT_LOADED 103
@@ -462,6 +471,8 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, vo
   if ( inMessage == XPLM_MSG_AIRPORT_LOADED ) { // 103
     slew_disable();
   }
+  if ( inMessage == XPLM_MSG_LIVERY_LOADED ) { // 108
+  }
 
   if ( inMessage == MSG_END_SLEWMODE ) {
     slew_disable();
@@ -471,13 +482,36 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, vo
 
 /**********************************************************************/
 
+// Get height offset to get wheel on ground
+// needs a plane position
+float get_reference_h(float fudge) {
+  float h = height(dr_plane_lx, dr_plane_ly, dr_plane_lz) - fudge; // fudge factor if unknown height/wheel size
+  return dr_plane_ly - h;
+}
+
+bool stationary() {
+  if ( (dr_plane_vx < 0.001) && (dr_plane_vy < 0.001) && (dr_plane_vz < 0.001) &&
+       (dr_plane_ax < 0.001) && (dr_plane_ay < 0.001) && (dr_plane_az < 0.001)) {
+    return true;
+  }
+  return false;
+}
+
+void dead_stop() {
+  dr_plane_vx = 0.0;
+  dr_plane_vy = 0.0;
+  dr_plane_vz = 0.0;
+  dr_plane_ax = 0.0;
+  dr_plane_ay = 0.0;
+  dr_plane_az = 0.0;
+}
+
 int SlewCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
   if (inPhase == 0) {
     slewmode = ! slewmode;
     // copied from menu handler:
     if ( slewmode ) {
-      float h = height(dr_plane_lx, dr_plane_ly, dr_plane_lz);
-      reference_h = dr_plane_ly - h;
+      reference_h = get_reference_h(0.0);
       dr_override_planepath = { static_cast<int>(1) };
       infow->showWindow();
       XPLMCheckMenuItem(myMenu, MENU_TOGGLE, xplm_Menu_Checked);
@@ -495,8 +529,7 @@ void MyMenuHandlerCallback( void *inMenuRef, void *inItemRef) {
   if ( (long)inItemRef == MENU_TOGGLE ) {
     slewmode = ! slewmode;
     if ( slewmode ) {
-      float h = height(dr_plane_lx, dr_plane_ly, dr_plane_lz);
-      reference_h = dr_plane_ly - h;
+      reference_h = get_reference_h(0.0);
       dr_override_planepath = { static_cast<int>(1) };
       infow->showWindow();
       XPLMCheckMenuItem(myMenu, MENU_TOGGLE, xplm_Menu_Checked);
@@ -612,9 +645,6 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
   float hdng = axis_scaled(axis_y); //dr_jsa_values[axis_y.idx];
   float thro = axis_scaled(axis_t); // scale with throttle
   
-  h = height(dr_plane_lx, dr_plane_ly, dr_plane_lz);
-  float h_diff = dr_plane_ly - h; // needed to get to 0, with reference_agl added
-
   if ( ! slewmode ) {
     return GPXLOG_INTERVAL;
   }
@@ -661,7 +691,7 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
 
   h = height(dr_plane_lx, dr_plane_ly, dr_plane_lz);
   if ( ! altmode ) {
-    dr_plane_ly = h + reference_h; // not when controlling height! 
+    dr_plane_ly = h + reference_h; // keep plane on ground
   } else if ( dr_plane_ly - reference_h < h ) {
     dr_plane_ly = h + reference_h; // underground fix  / BUT PROBLEM WHEN STARTING AT ALT, cannot go below
   }
