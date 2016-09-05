@@ -692,8 +692,9 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
   h = height(dr_plane_lx, dr_plane_ly, dr_plane_lz);
   if ( ! altmode ) {
     dr_plane_ly = h + reference_h; // keep plane on ground
-  } else if ( dr_plane_ly - reference_h < h ) {
+  } else if ( dr_plane_ly - reference_h < h ) { // this one is wrong? agl not writable?
     dr_plane_ly = h + reference_h; // underground fix  / BUT PROBLEM WHEN STARTING AT ALT, cannot go below
+    // here we change this third "height" as well.
   }
   }
   
