@@ -85,8 +85,8 @@ static bool altmode = false;
 static bool orimode = false; // orientation
 
 float mini_mult = 16.0; // this is m/s, at max throttle
-float maxi_mult = 16.0 * mini_mult; // 16*8 = 128 = ~256 kt
-float warp_mult =  4.0 * maxi_mult; // 4 * 256 = ~ 1024 kt
+float maxi_mult = 16.0 * mini_mult; // 16*16 = 256 = ~500 kt
+float warp_mult =  4.0 * maxi_mult; // 4 * 500 = ~2000 kt
 float mult = mini_mult;
 
 float yaw_reverse = 1.0; // set to -1.0 to reverse.
