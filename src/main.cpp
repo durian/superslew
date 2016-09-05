@@ -448,8 +448,6 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, vo
   (void)inFromWho;
   (void)inParam;
 
-  lg.xplm("XPluginReceiveMessage "+std::to_string(inMessage)+"\n");
-  
   // define XPLM_MSG_PLANE_CRASHED 101   <-- should unload here!
   // define XPLM_MSG_PLANE_LOADED 102
   // define XPLM_MSG_AIRPORT_LOADED 103
@@ -478,11 +476,9 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, vo
   if ( inMessage == XPLM_MSG_AIRPORT_LOADED ) { // 103
     slew_disable();
     reference_h = get_reference_h(0);
-    lg.xplm("reference_h="+rounded(reference_h)+"\n");
   }
   if ( inMessage == XPLM_MSG_LIVERY_LOADED ) { // 108
     reference_h = get_reference_h(0);
-    lg.xplm("reference_h="+rounded(reference_h)+"\n");
   }
 
   if ( inMessage == MSG_END_SLEWMODE ) {
