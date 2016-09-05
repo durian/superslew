@@ -401,7 +401,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_NORMAL, 1); 
   tmp = "Maximum Speed "+padded_int(int(maxi_mult), 4)+" m/s";
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_SPEED, 1); 
-  tmp = "Maximum Speed "+padded_int(int(4.0 * maxi_mult), 4)+" m/s";
+  tmp = "Maximum Speed "+padded_int(int(warp_mult), 4)+" m/s";
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_WARP, 1);
   XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Checked);
   XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Unchecked);
