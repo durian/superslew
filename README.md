@@ -21,9 +21,9 @@ Slew/ground control plugin for X-Plane 10
   of the plane instead.
 
 - There are three speeds settings to choose from. The first one has a
-  maximum speed of 8 m/s. The second setting has a maximum speed of
-  128 m/s, and the third one has a maximum speed of 512 m/s. The
-  latter corresponds to almost 1000 knots. Maximum speed is reached
+  maximum speed of 16 m/s. The second setting has a maximum speed of
+  256 m/s, and the third one has a maximum speed of 1024 m/s. The
+  latter corresponds to almost 2000 knots. Maximum speed is reached
   with maximum trottle.
 
 - Yaw control (controlling heading) is proportional to how far you
