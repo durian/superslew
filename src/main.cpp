@@ -711,7 +711,10 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
 
   // HEADING works the same in both modes
   if ( fabs(h_norm) > 0.1 ) {
-    ypr.psi += h_inc; // add 1 degree
+    ypr.psi = fmod(ypr.psi + h_inc, 360.0); // add/sub 1 degree
+    if ( ypr.psi < 0.0 ) {
+      ypr.psi += 360.0;
+    }
     //std::string m = "*si="+std::to_string(ypr.psi)+","+"the="+std::to_string(ypr.the)+","+"phi="+std::to_string(ypr.phi)+"\n";
     //lg.xplm( m );
     EulersToQuaternion(ypr, q); // convert back
@@ -720,6 +723,9 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
     // and update plane
     dr_plane_q = {static_cast<float>(q.w), static_cast<float>(q.x), static_cast<float>(q.y), static_cast<float>(q.z)};
     dr_plane_psi = fmod(psi + h_inc, 360.0);
+    if ( dr_plane_psi < 0.0 ) {
+      dr_plane_psi = dr_plane_psi + 360.0;
+    }
   }
 
   if ( orimode ) {

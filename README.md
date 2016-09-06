@@ -53,3 +53,5 @@ Slew/ground control plugin for X-Plane 10
 - Can be enabled "in flight" which sometimes causes spectacular effects
   when disabled again.
 
+- If enabled before going into the local map view, allows you to move
+  the plane around without ending up in the air and/or crashing.
