@@ -57,7 +57,7 @@ using namespace SUPERSLEW;
 std::string VERSION = "0.9";
 
 DataRef<int>    dr_sim_paused("sim/time/paused");
-DataRef<int>    dr_sim_speed("sim/time/sim_speed");
+DataRef<int>    dr_sim_speed("sim/time/sim_speed", ReadWrite);
 DataRef<float>  dr_sim_trts("sim/time/total_running_time_sec");
 DataRef<float>  dr_sim_tfts("sim/time/total_flight_time_sec");
 
@@ -148,7 +148,6 @@ override_planepath	int[20]	660+	yes	boolean	Override position updates of this pl
 ...
 override_engines	int	1000+	yes	boolean	overrides all engine calculations - write to LMN and g_nrml/side/axil.
 override_forces	int	1000+	yes	boolean	overrides all force calculations - write to LMN and g_nrml/side/axil.
-
 */
 
 FloatWindow *infow = nullptr;
