@@ -82,9 +82,9 @@ namespace SUPERSLEW {
     int in =   4; // (button) inset
     
     //200 is left margin
-    num_edit_label = XPCreateWidget(x, y+(r*rh), x+188, y+((r+1)*rh), 1, "Coordinates", 0, load_window, xpWidgetClass_Caption);
+    num_edit_label = XPCreateWidget(x, y+(r*rh), x+8, y+((r+1)*rh), 1, "Coordinates", 0, load_window, xpWidgetClass_Caption);
     std::string one = "53.4534 5.6729"; // padded(1, 4); //padded looks silly
-    num_edit = XPCreateWidget(x+204, y+(r*rh), x+348, y+((r+1)*rh), 1, one.c_str(), 0, load_window, xpWidgetClass_TextField);
+    num_edit = XPCreateWidget(x+68, y+(r*rh)-2, x+192, y+((r+1)*rh)-2, 1, one.c_str(), 0, load_window, xpWidgetClass_TextField);
     XPAddWidgetCallback(num_edit, num_edit_handler); //load_window_callback);
     
     // Row with buttons
@@ -151,7 +151,7 @@ namespace SUPERSLEW {
       if ( (theKey == XPLM_VK_DELETE) || (theKey == XPLM_VK_LEFT) || (theKey == XPLM_VK_RIGHT) ) {
 	return 0;
       }
-      if ( (theChar == '.') || (theChar == ',') || (theChar == ' ') || (theChar == '-') ) {
+      if ( (theChar == '.') || (theChar == ' ') || (theChar == '-') ) {
 	return 0;
       }
       if ( (theChar == 37) || (theChar == 39) || (theChar == 118) || (theChar == 8)) {

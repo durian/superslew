@@ -431,6 +431,7 @@ PLUGIN_API void	XPluginStop(void) {
   //closeInfoWindows();
   slewmode = false;
   G.delete_fwindows();
+  close_load_window();
   XPLMUnregisterFlightLoopCallback(MyFlightLoopCallback, NULL);
 }
 
@@ -608,7 +609,7 @@ void MyMenuHandlerCallback( void *inMenuRef, void *inItemRef) {
     }
   }
   if ( (long)inItemRef == MENU_GOTO ) {
-    create_load_window(128, 600, 448, 88);
+    create_load_window(128, 600, 216, 88);
   }
   if ( (long)inItemRef == MENU_NORMAL ) {
     mult = mini_mult;
