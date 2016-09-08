@@ -606,17 +606,6 @@ void MyMenuHandlerCallback( void *inMenuRef, void *inItemRef) {
       yaw_reverse = -1.0;
       XPLMCheckMenuItem(myMenu, MENU_YAWREVERSE, xplm_Menu_Checked);
     }
-    // TEST. WORKS WHEN IN SLEW MODE
-    /*
-    double x,y,z;
-    XPLMWorldToLocal(10.00, 10.00, 10, &x, &y, &z);
-    lg.xplm(rounded(x)+","+rounded(y)+","+rounded(z)+"\n");
-    dr_plane_lx = x;
-    dr_plane_ly = y;
-    dr_plane_lz = z;
-    // set q (phi,psi,theta)?
-    */
-    // END TEST
   }
   if ( (long)inItemRef == MENU_GOTO ) {
     create_load_window(128, 600, 448, 88);

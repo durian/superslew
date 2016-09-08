@@ -38,6 +38,12 @@ Slew/ground control plugin for X-Plane 10
   orientation mode, the psi (heading), phi (roll) and theta (pitch)
   values are shown instead of the geographical location.
 
+- With the "Go to coordinates" option, you can enter a latitude and
+  longitude, and your plane will be moved there. This only works if
+  SuperSlew is enabled. If you enter coordinates and push "Go to"
+  without the SuperSlew mode being enabled, you will be moved there as
+  soon as you enable it.
+  
 - Defines a custom command called `durian/superslew/toggle` which can
   be bound to a key or joystick button.
 
