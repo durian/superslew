@@ -55,7 +55,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 
 using namespace SUPERSLEW;
 
-std::string VERSION = "0.9";
+std::string VERSION = "0.92";
 
 DataRef<int>    dr_sim_paused("sim/time/paused");
 DataRef<int>    dr_sim_speed("sim/time/sim_speed", ReadWrite);
