@@ -51,6 +51,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 #include "Global.h"
 #include "Log.h"
 #include "float_window.h"
+#include "load_window.h"
 
 using namespace SUPERSLEW;
 
@@ -155,7 +156,7 @@ FloatWindow *infow = nullptr;
 XPLMMenuID	myMenu;
 int		mySubMenuItem;
 
-enum gpxlog_status {MENU_TOGGLE, MENU_TOGGLE_ALTMODE, MENU_TOGGLE_ORIMODE, MENU_SCAN, MENU_YAWREVERSE, MENU_NORMAL, MENU_SPEED, MENU_WARP};
+enum gpxlog_status {MENU_TOGGLE, MENU_TOGGLE_ALTMODE, MENU_TOGGLE_ORIMODE, MENU_SCAN, MENU_YAWREVERSE, MENU_GOTO, MENU_NORMAL, MENU_SPEED, MENU_WARP};
 
 extern const intptr_t MSG_END_SLEWMODE; //from float_window.h
 
@@ -395,7 +396,8 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   XPLMAppendMenuItem(myMenu, "Scan Joysticks",  (void*)MENU_SCAN, 1);
   XPLMAppendMenuItem(myMenu, "Reverse yaw",  (void*)MENU_YAWREVERSE, 1);
   XPLMCheckMenuItem(myMenu, MENU_YAWREVERSE, xplm_Menu_Unchecked);
-
+  XPLMAppendMenuItem(myMenu, "Goto Coordinates",  (void*)MENU_GOTO, 1);
+    
   std::string tmp = "Maximum Speed "+padded_int(int(mini_mult), 4)+" m/s"; // 6 b/c space needs 2
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_NORMAL, 1); 
   tmp = "Maximum Speed "+padded_int(int(maxi_mult), 4)+" m/s";
@@ -447,6 +449,8 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, vo
   (void)inFromWho;
   (void)inParam;
 
+  lg.xplm("XPluginReceiveMessage="+std::to_string(inMessage)+"\n");
+  
   // define XPLM_MSG_PLANE_CRASHED 101   <-- should unload here!
   // define XPLM_MSG_PLANE_LOADED 102
   // define XPLM_MSG_AIRPORT_LOADED 103
@@ -478,6 +482,36 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, vo
   }
   if ( inMessage == XPLM_MSG_LIVERY_LOADED ) { // 108
     reference_h = get_reference_h(0);
+  }
+
+  // When going to coordinates -- wait until here before we adjust height and orientation.
+  
+  if ( inMessage == XPLM_MSG_SCENERY_LOADED ) { // 104
+    if ( (G.goto_psi < 999.9) && (G.goto_phi < 999.9) ) {
+      lg.xplm("Setting orientation\n");
+      Quaternion q;
+      float quat_0 = dr_plane_q[0];
+      float quat_1 = dr_plane_q[1];
+      float quat_2 = dr_plane_q[2];
+      float quat_3 = dr_plane_q[3];
+      Eulers ypr = {0, 0, 0};
+      
+      ypr.psi = G.goto_psi;
+      ypr.the = G.goto_the;
+      ypr.phi = G.goto_phi;
+      EulersToQuaternion(ypr, q); // convert back
+      dr_plane_q = {static_cast<float>(q.w), static_cast<float>(q.x), static_cast<float>(q.y), static_cast<float>(q.z)};
+      dr_plane_psi = G.goto_psi;
+      dr_plane_the = G.goto_the;
+      dr_plane_phi = G.goto_phi;
+      
+      lg.xplm("Setting altitude\n");
+      float h = height(dr_plane_lx, dr_plane_ly, dr_plane_lz);
+      dr_plane_ly = h + reference_h;
+
+      G.goto_psi = 999.9;
+      G.goto_phi = 999.9;
+    }
   }
 
   if ( inMessage == MSG_END_SLEWMODE ) {
@@ -572,6 +606,20 @@ void MyMenuHandlerCallback( void *inMenuRef, void *inItemRef) {
       yaw_reverse = -1.0;
       XPLMCheckMenuItem(myMenu, MENU_YAWREVERSE, xplm_Menu_Checked);
     }
+    // TEST. WORKS WHEN IN SLEW MODE
+    /*
+    double x,y,z;
+    XPLMWorldToLocal(10.00, 10.00, 10, &x, &y, &z);
+    lg.xplm(rounded(x)+","+rounded(y)+","+rounded(z)+"\n");
+    dr_plane_lx = x;
+    dr_plane_ly = y;
+    dr_plane_lz = z;
+    // set q (phi,psi,theta)?
+    */
+    // END TEST
+  }
+  if ( (long)inItemRef == MENU_GOTO ) {
+    create_load_window(128, 600, 448, 88);
   }
   if ( (long)inItemRef == MENU_NORMAL ) {
     mult = mini_mult;
@@ -646,6 +694,7 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
   lg.xplm( m );
   */
 
+ 
   float ptch = axis_scaled(axis_p); //dr_jsa_values[axis_p.idx];
   float roll = axis_scaled(axis_r); //dr_jsa_values[axis_r.idx];
   float hdng = axis_scaled(axis_y); //dr_jsa_values[axis_y.idx];
@@ -654,6 +703,29 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
   if ( ! slewmode ) {
     return GPXLOG_INTERVAL;
   }
+  
+  if ( (G.goto_lat < 512.0) && (G.goto_lon < 512.0) ) {
+    
+    double x,y,z;
+    lg.xplm("Starting goto\n");
+    XPLMWorldToLocal(G.goto_lat, G.goto_lon, 1, &x, &y, &z);
+    lg.xplm(rounded(x)+","+rounded(y)+","+rounded(z)+"\n");
+    dr_plane_lx = x;
+    dr_plane_ly = y;
+    dr_plane_lz = z;
+    // set q (phi,psi,theta)?
+
+    // done in SCENERY_LOADED later
+    G.goto_psi = dr_plane_psi;
+    G.goto_the = dr_plane_the;
+    G.goto_phi = dr_plane_phi;
+    
+    G.goto_lat = 999.9;
+    G.goto_lon = 999.9;
+    
+    return GPXLOG_INTERVAL;
+  }
+
 
   float inc = thro * mult * elapsed;
   

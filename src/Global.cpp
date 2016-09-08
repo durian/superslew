@@ -69,6 +69,18 @@ namespace SUPERSLEW {
     }
   }
 
+  void split(const std::string& s, std::vector<std::string>& v) {
+    char delim = ' ';
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+      trim(item);
+      if ( item.size() > 1 ) {
+	v.push_back(item);
+      }
+    }
+  }
+
   // Default values if no config file found.
   Global::Global() {
   }

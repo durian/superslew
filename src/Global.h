@@ -23,6 +23,7 @@ namespace SUPERSLEW {
   std::string &rtrim(std::string &);
   std::string &trim(std::string &);
   void listify(const std::string&, std::vector<std::string>&);
+  void split(const std::string&, std::vector<std::string>&);
     
   class Global {
 
@@ -43,6 +44,13 @@ namespace SUPERSLEW {
     std::string vkey;
     
     std::map<std::string, FloatWindow*> fwindows;
+
+    double goto_lat = 999.9;
+    double goto_lon = 999.9;
+    double goto_alt = -1.0;
+    double goto_psi = 999.9;
+    double goto_phi = 999.9;
+    double goto_the = 999.9;
     
     // Constructor.
     Global();

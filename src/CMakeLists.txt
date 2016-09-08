@@ -1,7 +1,7 @@
 
-SET(SRC dataref.cpp Global.cpp Log.cpp main.cpp)
+SET(SRC dataref.cpp Global.cpp Log.cpp load_window.cpp main.cpp)
 
-SET(HDR dataref.h Global.h Log.h float_window.h main.h)
+SET(HDR dataref.h Global.h Log.h float_window.h load_window.h main.h)
 
 SET(ALL_SRC ${SRC} ${HDR})
 LIST(SORT ALL_SRC)
