@@ -362,7 +362,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   strcpy(outName, "SuperSlew");
   strcpy(outSig,  "org.durian.superslew");
   strcpy(outDesc, "A plugin (superslew).");
-  std::string compile_date("SUPERSLEW plugin compiled on " __DATE__ " at " __TIME__ "\n");
+  std::string compile_date("Plugin compiled on " __DATE__ " at " __TIME__ "\n");
   lg.xplm( compile_date.c_str() );
   
   XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);  
@@ -410,7 +410,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   XPLMCheckMenuItem(myMenu, MENU_YAWREVERSE, xplm_Menu_Unchecked);
   XPLMAppendMenuItem(myMenu, "Goto Coordinates",  (void*)MENU_GOTO, 1);
     
-  std::string tmp = "Maximum Speed "+padded_int(int(mini_mult), 4)+" m/s"; // 6 b/c space needs 2
+  std::string tmp = "Maximum Speed "+padded_int(int(mini_mult), 4)+" m/s";
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_NORMAL, 1); 
   tmp = "Maximum Speed "+padded_int(int(maxi_mult), 4)+" m/s";
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_SPEED, 1); 
@@ -461,25 +461,8 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, vo
   (void)inFromWho;
   (void)inParam;
 
-  lg.xplm("XPluginReceiveMessage="+std::to_string(inMessage)+"\n");
-  
-  // define XPLM_MSG_PLANE_CRASHED 101   <-- should unload here!
-  // define XPLM_MSG_PLANE_LOADED 102
-  // define XPLM_MSG_AIRPORT_LOADED 103
-  // define XPLM_MSG_SCENERY_LOADED 104  <-- urg, recals local positions based on global? (which we don't keep)
-  // define XPLM_MSG_AIRPLANE_COUNT_CHANGED 105
-  // define XPLM_MSG_PLANE_UNLOADED 106
-  // define XPLM_MSG_WILL_WRITE_PREFS 107
-  // define XPLM_MSG_LIVERY_LOADED 108
-  /*
-    order: (XP10)
-    20150718 14:35:22.164: XPluginReceiveMessage 106
-    20150718 14:35:22.571: XPluginReceiveMessage 102
-    20150718 14:35:27.670: XPluginReceiveMessage 108
-    20150718 14:35:44.627: XPluginReceiveMessage 104
-    20150718 14:35:50.688: XPluginReceiveMessage 103
-    20150718 14:35:52.543: XPluginReceiveMessage 108
-  */
+  //lg.xplm("XPluginReceiveMessage="+std::to_string(inMessage)+"\n");
+
   if ( inMessage == XPLM_MSG_PLANE_CRASHED ) { // 101
     slew_disable();
   }
@@ -492,14 +475,14 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, vo
     slew_disable();
     reference_h = get_reference_h(0);
   }
+  
   if ( inMessage == XPLM_MSG_LIVERY_LOADED ) { // 108
     reference_h = get_reference_h(0);
   }
 
-  // When going to coordinates -- wait until here before we adjust height and orientation.
-  
+  // When going to coordinates -- wait until 104 before we adjust height and orientation.
   if ( inMessage == XPLM_MSG_SCENERY_LOADED ) { // 104
-    if ( (G.goto_psi < 999.9) && (G.goto_phi < 999.9) ) {
+    if ( (G.goto_psi < 999.9) && (G.goto_phi < 999.9) ) { // we have a correction to make
       lg.xplm("Setting orientation\n");
       Quaternion q;
       float quat_0 = dr_plane_q[0];
@@ -521,6 +504,7 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, vo
       float h = height(dr_plane_lx, dr_plane_ly, dr_plane_lz);
       dr_plane_ly = h + reference_h;
 
+      // Disable correction for next loop
       G.goto_psi = 999.9;
       G.goto_phi = 999.9;
     }
