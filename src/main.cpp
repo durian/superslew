@@ -348,7 +348,7 @@ void slew_disable() {
 void slew_enable() {
   if ( ! slewmode ) {
     slewmode = true;
-    reference_h = get_reference_h(0.0);
+    reference_h = get_reference_h(0.0); // this causes probs when starting in air?
     dr_override_planepath = { static_cast<int>(1) };
     infow->showWindow();
     XPLMCheckMenuItem(myMenu, MENU_TOGGLE, xplm_Menu_Checked);
@@ -684,11 +684,11 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
   }
   
   if ( (G.goto_lat < 512.0) && (G.goto_lon < 512.0) ) {
-    
     double x,y,z;
-    lg.xplm("Starting goto\n");
+    // maybe move "from" coordinates to edit box now? 
+    lg.xplm("Goto "+rounded6(G.goto_lat)+" "+rounded6(G.goto_lon)+"\n");
     XPLMWorldToLocal(G.goto_lat, G.goto_lon, 1, &x, &y, &z);
-    lg.xplm(rounded(x)+","+rounded(y)+","+rounded(z)+"\n");
+    lg.xplm("Local x="+rounded(x)+", y="+rounded(y)+", z="+rounded(z)+"\n");
     dr_plane_lx = x;
     dr_plane_ly = y;
     dr_plane_lz = z;
@@ -749,7 +749,7 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
   h = height(dr_plane_lx, dr_plane_ly, dr_plane_lz);
   if ( ! altmode ) {
     dr_plane_ly = h + reference_h; // keep plane on ground
-  } else if ( dr_plane_ly - reference_h < h ) { // this one is wrong? agl not writable?
+  } else if ( dr_plane_ly - reference_h < h ) { 
     dr_plane_ly = h + reference_h; // underground fix  / BUT PROBLEM WHEN STARTING AT ALT, cannot go below
     // here we change this third "height" as well.
   }
