@@ -256,7 +256,11 @@ double distance(double lat0, double lon0, double lat1, double lon1) {
 float axis_scaled(Axis a) {
   float val = dr_jsa_values[a.idx];
   float range = a.max - a.min;
-  float pot = (val - a.min) / range;
+  float pot = 0.0;
+  if ( FP_ZERO != fpclassify(range) ) {
+    //if ( range > 0.0001 ) {
+    pot = (val - a.min) / range;
+  }
   return pot;
 }
 
