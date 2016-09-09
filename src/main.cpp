@@ -56,7 +56,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 
 using namespace SUPERSLEW;
 
-std::string VERSION = "0.92";
+std::string VERSION = "0.93";
 
 DataRef<int>    dr_sim_paused("sim/time/paused");
 DataRef<int>    dr_sim_speed("sim/time/sim_speed", ReadWrite);
@@ -366,8 +366,8 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   */
   strcpy(outName, "SuperSlew");
   strcpy(outSig,  "org.durian.superslew");
-  strcpy(outDesc, "A plugin (superslew).");
-  std::string compile_date("Plugin compiled on " __DATE__ " at " __TIME__ "\n");
+  strcpy(outDesc, "SuperSlew plugin");
+  std::string compile_date("Plugin "+VERSION+" compiled on " __DATE__ " at " __TIME__ "\n");
   lg.xplm( compile_date.c_str() );
   
   XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);  
