@@ -258,7 +258,7 @@ float axis_scaled(Axis a) {
   float val = dr_jsa_values[a.idx];
   float range = a.max - a.min;
   float pot = 0.5; // pretend in middle? but not for throttle?
-  if ( FP_ZERO != fpclassify(range) ) {
+  if ( FP_ZERO != std::fpclassify(range) ) {
     //if ( range > 0.0001 ) {
     pot = (val - a.min) / range;
   }
