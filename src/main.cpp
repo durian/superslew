@@ -31,6 +31,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <bitset>
 
 #include <stdio.h>
 #include <string.h>
@@ -287,8 +288,10 @@ std::string padded_int(int i, int l) {
   return std::string(d*2, ' ') + res;
 }
 
-void scan_joy() {
-  for (int i = 0; i < 100; i++) {
+void scan_joy() { // may scan backwards? latest joysticks are at the end? stop when found all 4?
+  std::bitset<4> found; // [0,0,0,0]
+  
+  for (int i = 99; i >= 0; i--) {
     if ( dr_jsa_assignments[i] == 1 ) {
       lg.xplm("dr_jsa_assignments 1 (pitch) = "+std::to_string(i)+"\n");
       float min = dr_jsa_minimum[i];
@@ -298,6 +301,7 @@ void scan_joy() {
 	axis_p.idx = i; // pitch
 	axis_p.min = min;
 	axis_p.max = max;
+	found.set(0);
       }
     }
     if ( dr_jsa_assignments[i] == 2 ) {
@@ -309,6 +313,7 @@ void scan_joy() {
 	axis_r.idx = i;  //roll
 	axis_r.min = min;
 	axis_r.max = max;
+	found.set(1);
       }
     }
     if ( dr_jsa_assignments[i] == 3 ) { // pedal is 4?
@@ -320,6 +325,7 @@ void scan_joy() {
 	axis_y.idx = i; // yaw
 	axis_y.min = min;
 	axis_y.max = max;
+	found.set(2);
       }
     }
     if ( dr_jsa_assignments[i] == 4 ) { //throttle
@@ -331,7 +337,12 @@ void scan_joy() {
 	axis_t.idx = i; // yaw
 	axis_t.min = min;
 	axis_t.max = max;
+	found.set(3);
       }
+    }
+    //lg.xplm("FOUND "+found.to_string()+"\n");
+    if ( found == 15 ) {
+      break;
     }
   } 
 }
