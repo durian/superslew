@@ -332,10 +332,22 @@ void scan_joy() {
 }
 
 void slew_disable() {
-  dr_override_planepath = { 0,0 }; // works on windows... should "get" the second value first?
-  XPLMCheckMenuItem(myMenu, MENU_TOGGLE, xplm_Menu_Unchecked);
-  infow->hideWindow();
-  slewmode = false;
+  if ( slewmode ) {
+    dr_override_planepath = { 0,0 }; // works on windows... should "get" the second value first?
+    XPLMCheckMenuItem(myMenu, MENU_TOGGLE, xplm_Menu_Unchecked);
+    infow->hideWindow();
+    slewmode = false;
+  }
+}
+
+void slew_enable() {
+  if ( ! slewmode ) {
+    slewmode = true;
+    reference_h = get_reference_h(0.0);
+    dr_override_planepath = { static_cast<int>(1) };
+    infow->showWindow();
+    XPLMCheckMenuItem(myMenu, MENU_TOGGLE, xplm_Menu_Checked);
+  }
 }
 
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
@@ -420,7 +432,6 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
 			     0,                  // Receive input before plugin windows. (or 1?)
 			     (void *) 0);        // inRefcon.
 
-  
   slewmode = false;  
   lg.xplm( "Initialised.\n" );
 
@@ -549,16 +560,10 @@ void dead_stop() {
 
 int SlewCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
   if (inPhase == 0) {
-    slewmode = ! slewmode;
-    // copied from menu handler:
-    if ( slewmode ) {
-      reference_h = get_reference_h(0.0);
-      dr_override_planepath = { static_cast<int>(1) };
-      infow->showWindow();
-      XPLMCheckMenuItem(myMenu, MENU_TOGGLE, xplm_Menu_Checked);
+    if ( ! slewmode ) {
+      slew_enable();
     } else {
       slew_disable();
-      infow->hideWindow();
     }
   }
   return 0;
@@ -568,16 +573,10 @@ void MyMenuHandlerCallback( void *inMenuRef, void *inItemRef) {
   (void)inMenuRef;
 
   if ( (long)inItemRef == MENU_TOGGLE ) {
-    slewmode = ! slewmode;
-    if ( slewmode ) {
-      reference_h = get_reference_h(0.0);
-      dr_override_planepath = { static_cast<int>(1) };
-      infow->showWindow();
-      XPLMCheckMenuItem(myMenu, MENU_TOGGLE, xplm_Menu_Checked);
+    if ( ! slewmode ) {
+      slew_enable();
     } else {
-      //dr_override_planepath = { static_cast<int>(0) }; // error on windows...
       slew_disable();
-      infow->hideWindow();
     }
   }
   if ( (long)inItemRef == MENU_TOGGLE_ALTMODE ) {
@@ -609,6 +608,7 @@ void MyMenuHandlerCallback( void *inMenuRef, void *inItemRef) {
     }
   }
   if ( (long)inItemRef == MENU_GOTO ) {
+    slew_enable();
     create_load_window(128, 600, 216, 88);
   }
   if ( (long)inItemRef == MENU_NORMAL ) {
