@@ -727,43 +727,43 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
   float spd = 0.0;
 
   if ( ! orimode ) {
-  // 0.00 .. 0.50 .. 1.00 
-  if ( ptch > 0.70 ) { // why is positive 0.5 pulling stick back?
-    dr_plane_lx = dr_plane_lx - inc *  sin(psi * (M_PI/180.0));
-    dr_plane_lz = dr_plane_lz - inc * -cos(psi * (M_PI/180.0));
-    spd = inc / elapsed;
-  } // and now backwards
-  else if ( ptch < 0.30 ) {
-    dr_plane_lx = dr_plane_lx + inc *  sin(psi * (M_PI/180.0));
-    dr_plane_lz = dr_plane_lz + inc * -cos(psi * (M_PI/180.0));
-    spd = inc / elapsed;
-  }
-  // Roll should maybe be alt - we can get anywhere by rotating and forwards/backwards.
-  if ( roll > 0.70 ) {
-    spd = inc / elapsed;
-    if ( altmode ) {
-      dr_plane_ly = dr_plane_ly + inc;
-    } else {
-      dr_plane_lx = dr_plane_lx + inc *  sin( (psi+90.0) * (M_PI/180.0));
-      dr_plane_lz = dr_plane_lz + inc * -cos( (psi+90.0) * (M_PI/180.0));
+    // 0.00 .. 0.50 .. 1.00 
+    if ( ptch > 0.70 ) { // why is positive 0.5 pulling stick back?
+      dr_plane_lx = dr_plane_lx - inc *  sin(psi * (M_PI/180.0));
+      dr_plane_lz = dr_plane_lz - inc * -cos(psi * (M_PI/180.0));
+      spd = inc / elapsed;
+    } // and now backwards
+    else if ( ptch < 0.30 ) {
+      dr_plane_lx = dr_plane_lx + inc *  sin(psi * (M_PI/180.0));
+      dr_plane_lz = dr_plane_lz + inc * -cos(psi * (M_PI/180.0));
+      spd = inc / elapsed;
     }
-  } else if ( roll < 0.30 ) {
-    spd = inc / elapsed;
-    if ( altmode ) {
-      dr_plane_ly = dr_plane_ly - inc;
-    } else {
-      dr_plane_lx = dr_plane_lx + inc *  sin( (psi-90.0) * (M_PI/180.0));
-      dr_plane_lz = dr_plane_lz + inc * -cos( (psi-90.0) * (M_PI/180.0));
-    }
-  } 
+    // Roll should maybe be alt - we can get anywhere by rotating and forwards/backwards.
+    if ( roll > 0.70 ) {
+      spd = inc / elapsed;
+      if ( altmode ) {
+	dr_plane_ly = dr_plane_ly + inc;
+      } else {
+	dr_plane_lx = dr_plane_lx + inc *  sin( (psi+90.0) * (M_PI/180.0));
+	dr_plane_lz = dr_plane_lz + inc * -cos( (psi+90.0) * (M_PI/180.0));
+      }
+    } else if ( roll < 0.30 ) {
+      spd = inc / elapsed;
+      if ( altmode ) {
+	dr_plane_ly = dr_plane_ly - inc;
+      } else {
+	dr_plane_lx = dr_plane_lx + inc *  sin( (psi-90.0) * (M_PI/180.0));
+	dr_plane_lz = dr_plane_lz + inc * -cos( (psi-90.0) * (M_PI/180.0));
+      }
+    } 
 
-  h = height(dr_plane_lx, dr_plane_ly, dr_plane_lz);
-  if ( ! altmode ) {
-    dr_plane_ly = h + reference_h; // keep plane on ground
-  } else if ( dr_plane_ly - reference_h < h ) { 
-    dr_plane_ly = h + reference_h; // underground fix  / BUT PROBLEM WHEN STARTING AT ALT, cannot go below
-    // here we change this third "height" as well.
-  }
+    h = height(dr_plane_lx, dr_plane_ly, dr_plane_lz);
+    if ( ! altmode ) {
+      dr_plane_ly = h + reference_h; // keep plane on ground
+    } else if ( dr_plane_ly - reference_h < h ) { 
+      dr_plane_ly = h + reference_h; // underground fix  / BUT PROBLEM WHEN STARTING AT ALT, cannot go below
+      // here we change this third "height" as well.
+    }
   }
   
   // heading, we need a "reverse" option here.
