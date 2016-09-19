@@ -852,7 +852,6 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
 
   latlon = "psi="+rounded(dr_plane_psi)+" phi="+rounded(dr_plane_phi)+" the="+rounded(dr_plane_the)+" ORI";
   latlon += " M"+std::to_string(int(mult));
-  latlon += " "+std::to_string(int(dr_plane_psi)); // true_psi?
   latlon += " "+std::to_string(int(spd*1.94384))+" kt";
   infow->updateText2( latlon );
 
