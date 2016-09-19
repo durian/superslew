@@ -844,13 +844,15 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
   //av = "agl="+rounded(dr_plane_y_agl)+", "+"plane_ly="+rounded(dr_plane_ly)+", h_offset="+rounded(reference_h);//+"\n";
   std::string latlon;
   latlon = rounded6(dr_plane_lat)+" "+rounded6(dr_plane_lon);
-  if ( G.altmode ) {
+  if ( G.orimode ) {
+    latlon += " ORI";
+  } else if ( G.altmode ) {
     latlon += " ALT";
   }
   av = "agl "+rounded(dr_plane_y_agl)+", "+latlon;
   infow->updateText1( av );
 
-  latlon = "psi="+rounded(dr_plane_psi)+" phi="+rounded(dr_plane_phi)+" the="+rounded(dr_plane_the)+" ORI";
+  latlon = "psi="+rounded(dr_plane_psi)+" phi="+rounded(dr_plane_phi)+" the="+rounded(dr_plane_the);
   latlon += " M"+std::to_string(int(mult));
   latlon += " "+std::to_string(int(spd*1.94384))+" kt";
   infow->updateText2( latlon );
