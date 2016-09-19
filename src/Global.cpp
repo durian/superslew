@@ -89,6 +89,83 @@ namespace SUPERSLEW {
     lg.xplm( "Deleted Global.\n" );
   }
 
+  void Global::read_prefs(std::string& filename) {
+    std::ifstream file( filename.c_str() );
+    if ( ! file ) {
+      // write a default one
+      std::ofstream file( filename.c_str(), std::ios::out );
+      if ( ! file ) {
+	lg.xplm("ERROR: can not write config file.\n");
+	return;
+      }
+      file << "altmode = 0" << std::endl;
+      file << "orimode = 0" << std::endl;
+      file << "speed = 0" << std::endl;
+      file.close();
+      return;
+    }
+    std::string a_line;
+    while( std::getline( file, a_line )) {
+      if ( a_line.length() == 0 ) {
+	continue;
+      }
+      if ( a_line.at(0) == '#' ) {
+	continue;
+      }
+
+      size_t pos = a_line.find( '=', 0 );
+      if ( pos != std::string::npos ) {
+	std::string lhs = a_line.substr( 0, pos );
+	trim(lhs);
+	std::string rhs = a_line.substr( pos+1 );
+	trim(rhs);
+	if ( (lhs != "") && (rhs != "") ) {
+	  std::string tmp = lhs +"="+rhs+"\n";
+	  lg.xplm( tmp );
+	  // 
+	  if ( lhs == "altmode" ) {
+	    int x = int(std::stoi(rhs));
+	    if ( x == 1 ) {
+	      G.altmode = true;
+	    }
+	  }
+	  if ( lhs == "orimode" ) {
+	    int x = int(std::stoi(rhs));
+	    if ( x == 1 ) {
+	      G.orimode = true;
+	    }
+	  }
+	  if ( lhs == "speed" ) {
+	    int x = int(std::stoi(rhs));
+	    G.speed = x;
+	  }
+	}
+      }
+    }
+  }
+
+  void Global::write_prefs(std::string& filename) {
+    std::ofstream file( filename.c_str(), std::ios::out );
+    if ( ! file ) {
+      lg.xplm("ERROR: can not write config file.\n");
+      return;
+    }
+    file << "altmode = ";
+    if ( G.altmode ) {
+      file << "1" << std::endl;
+    } else {
+      file << "0" << std::endl;
+    }
+    file << "orimode = ";
+    if ( G.orimode ) {
+      file << "1" << std::endl;
+    } else {
+      file << "0" << std::endl;
+    }
+    file << "speed = " << G.speed << std::endl;
+    file.close();
+    return;
+  }
 
   float Global::random_variation(int variation) {
     // return 0.9-1.1 for random_variation(10) -> a multiplication factor

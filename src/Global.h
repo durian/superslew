@@ -51,13 +51,20 @@ namespace SUPERSLEW {
     double goto_psi = 999.9;
     double goto_phi = 999.9;
     double goto_the = 999.9;
+
+    // Start up/inifile parameters
+    bool altmode = false;
+    bool orimode = false;
+    int speed = 0;
     
     // Constructor.
     Global();
     
     // Destructor.
     ~Global();
-    
+
+    void read_prefs(std::string&);
+    void write_prefs(std::string&);
     float random_variation(int);
     float random_range(float,float);
     std::string random_string(size_t);

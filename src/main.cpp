@@ -84,8 +84,6 @@ Axis axis_y = {0, 0, 0};
 Axis axis_t = {0, 0, 0}; // throttle
 
 static bool slewmode = false;
-static bool altmode = false;
-static bool orimode = false; // orientation
 
 float mini_mult = 16.0; // this is m/s, at max throttle
 float maxi_mult = 16.0 * mini_mult; // 16*16 = 256 = ~500 kt
@@ -349,7 +347,7 @@ void scan_joy() { // may scan backwards? latest joysticks are at the end? stop w
 
 void slew_disable() {
   if ( slewmode ) {
-    dr_override_planepath = { 0,0 }; // works on windows... should "get" the second value first?
+    dr_override_planepath = { static_cast<int>(0) };//{ 0,0 }; // works on windows... should "get" the second value first?
     XPLMCheckMenuItem(myMenu, MENU_TOGGLE, xplm_Menu_Unchecked);
     infow->hideWindow();
     slewmode = false;
@@ -388,9 +386,16 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   const char *sep = XPLMGetDirectorySeparator();
 
   // The initialisation file
-  std::string prefsfile = std::string(filebase) + "Resources" + sep + "plugins" + sep+ "superslew" + sep + "drop.ini";  
+  std::string prefsfile = std::string(filebase) + "Resources" + sep + "plugins" + sep+ "superslew" + sep + "superslew.ini";  
   G.prefsfilename = prefsfile;
+  G.read_prefs(prefsfile);
 
+  if ( G.speed == 2 ) {
+    mult = maxi_mult;
+  } else if ( G.speed == 3 ) {
+    mult = warp_mult;
+  }
+  
   // First we put a new menu item into the plugin menu
   mySubMenuItem = XPLMAppendMenuItem(XPLMFindPluginsMenu(), // Plugins menu 
 				     "SuperSlew", // Menu title
@@ -409,13 +414,13 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   XPLMCheckMenuItem(myMenu, MENU_TOGGLE, xplm_Menu_Unchecked);
 
   XPLMAppendMenuItem(myMenu, "Toggle Altitude Control",  (void*)MENU_TOGGLE_ALTMODE, 1);
-  if ( altmode ) {
+  if ( G.altmode ) {
     XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ALTMODE, xplm_Menu_Checked);
   } else {
     XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ALTMODE, xplm_Menu_Unchecked);
   }
   XPLMAppendMenuItem(myMenu, "Toggle Orientation Control",  (void*)MENU_TOGGLE_ORIMODE, 1);
-  if ( orimode ) {
+  if ( G.orimode ) {
     XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ORIMODE, xplm_Menu_Checked);
   } else {
     XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ORIMODE, xplm_Menu_Unchecked);
@@ -432,9 +437,16 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_SPEED, 1); 
   tmp = "Maximum Speed "+padded_int(int(warp_mult), 4)+" m/s";
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_WARP, 1);
-  XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Checked);
-  XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Unchecked);
-  XPLMCheckMenuItem(myMenu, MENU_WARP, xplm_Menu_Unchecked);
+  XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Unchecked);
+   XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Unchecked);
+   XPLMCheckMenuItem(myMenu, MENU_WARP, xplm_Menu_Unchecked);
+   if ( mult == mini_mult ) {
+     XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Checked);
+   } else if ( mult == maxi_mult ) {
+     XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Checked);
+   } else {
+     XPLMCheckMenuItem(myMenu, MENU_WARP, xplm_Menu_Checked);
+   }
   
   XPLMRegisterFlightLoopCallback(DeferredInitNewAircraftFLCB, -1, NULL);
 
@@ -456,6 +468,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
 
 PLUGIN_API void	XPluginStop(void) {
   //closeInfoWindows();
+  G.write_prefs(G.prefsfilename);
   slewmode = false;
   G.delete_fwindows();
   close_load_window();
@@ -580,16 +593,16 @@ void MyMenuHandlerCallback( void *inMenuRef, void *inItemRef) {
     }
   }
   if ( (long)inItemRef == MENU_TOGGLE_ALTMODE ) {
-    altmode = ! altmode; 
-    if ( altmode ) {
+    G.altmode = ! G.altmode; 
+    if ( G.altmode ) {
       XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ALTMODE, xplm_Menu_Checked);
     } else {
       XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ALTMODE, xplm_Menu_Unchecked);
     }
   }
   if ( (long)inItemRef == MENU_TOGGLE_ORIMODE ) {
-    orimode = ! orimode; 
-    if ( orimode ) {
+    G.orimode = ! G.orimode; 
+    if ( G.orimode ) {
       XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ORIMODE, xplm_Menu_Checked);
     } else {
       XPLMCheckMenuItem(myMenu, MENU_TOGGLE_ORIMODE, xplm_Menu_Unchecked);
@@ -613,18 +626,21 @@ void MyMenuHandlerCallback( void *inMenuRef, void *inItemRef) {
   }
   if ( (long)inItemRef == MENU_NORMAL ) {
     mult = mini_mult;
+    G.speed = 1;
     XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Checked);
     XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Unchecked);
     XPLMCheckMenuItem(myMenu, MENU_WARP, xplm_Menu_Unchecked);
   }
   if ( (long)inItemRef == MENU_SPEED ) {
     mult = maxi_mult;
+    G.speed = 2;
     XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Unchecked);
     XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Checked);
     XPLMCheckMenuItem(myMenu, MENU_WARP, xplm_Menu_Unchecked);
   }
   if ( (long)inItemRef == MENU_WARP ) {
     mult = warp_mult;
+    G.speed = 3;
     XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Unchecked);
     XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Unchecked);
     XPLMCheckMenuItem(myMenu, MENU_WARP, xplm_Menu_Checked);
@@ -726,7 +742,7 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
 
   float spd = 0.0;
 
-  if ( ! orimode ) {
+  if ( ! G.orimode ) {
     // 0.00 .. 0.50 .. 1.00 
     if ( ptch > 0.70 ) { // why is positive 0.5 pulling stick back?
       dr_plane_lx = dr_plane_lx - inc *  sin(psi * (M_PI/180.0));
@@ -741,7 +757,7 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
     // Roll should maybe be alt - we can get anywhere by rotating and forwards/backwards.
     if ( roll > 0.70 ) {
       spd = inc / elapsed;
-      if ( altmode ) {
+      if ( G.altmode ) {
 	dr_plane_ly = dr_plane_ly + inc;
       } else {
 	dr_plane_lx = dr_plane_lx + inc *  sin( (psi+90.0) * (M_PI/180.0));
@@ -749,7 +765,7 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
       }
     } else if ( roll < 0.30 ) {
       spd = inc / elapsed;
-      if ( altmode ) {
+      if ( G.altmode ) {
 	dr_plane_ly = dr_plane_ly - inc;
       } else {
 	dr_plane_lx = dr_plane_lx + inc *  sin( (psi-90.0) * (M_PI/180.0));
@@ -758,7 +774,7 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
     } 
 
     h = height(dr_plane_lx, dr_plane_ly, dr_plane_lz);
-    if ( ! altmode ) {
+    if ( ! G.altmode ) {
       dr_plane_ly = h + reference_h; // keep plane on ground
     } else if ( dr_plane_ly - reference_h < h ) { 
       dr_plane_ly = h + reference_h; // underground fix  / BUT PROBLEM WHEN STARTING AT ALT, cannot go below
@@ -789,7 +805,7 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
     }
   }
 
-  if ( orimode ) {
+  if ( G.orimode ) {
     h_inc = thro; // 0..1
     
     //ypr = {0, 0, 0};
@@ -824,19 +840,17 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
   
   std::string av = "ptch="+rounded(ptch)+", "+"roll="+rounded(roll)+", "+"hdng="+rounded(hdng)+", "+"thro="+rounded(thro)+"\n";
   infow->updateText( av );
-  av = "agl="+rounded(dr_plane_y_agl)+", "+"plane_ly="+rounded(dr_plane_ly)+", h_offset="+rounded(reference_h);//+"\n";
+
+  //av = "agl="+rounded(dr_plane_y_agl)+", "+"plane_ly="+rounded(dr_plane_ly)+", h_offset="+rounded(reference_h);//+"\n";
+  std::string latlon;
+  latlon = rounded6(dr_plane_lat)+" "+rounded6(dr_plane_lon);
+  if ( G.altmode ) {
+    latlon += " ALT";
+  }
+  av = "agl "+rounded(dr_plane_y_agl)+", "+latlon;
   infow->updateText1( av );
 
-  std::string latlon;
-  if ( ! orimode ) {
-    latlon = rounded6(dr_plane_lat)+" "+rounded6(dr_plane_lon);
-    if ( altmode ) {
-      latlon += " ALT";
-    }
-  } else {
-    latlon = "psi="+rounded(dr_plane_psi)+" phi="+rounded(dr_plane_phi)+" the="+rounded(dr_plane_the)+" ORI";
-  }
-
+  latlon = "psi="+rounded(dr_plane_psi)+" phi="+rounded(dr_plane_phi)+" the="+rounded(dr_plane_the)+" ORI";
   latlon += " M"+std::to_string(int(mult));
   latlon += " "+std::to_string(int(dr_plane_psi)); // true_psi?
   latlon += " "+std::to_string(int(spd*1.94384))+" kt";
