@@ -347,7 +347,7 @@ void scan_joy() { // may scan backwards? latest joysticks are at the end? stop w
 
 void slew_disable() {
   if ( slewmode ) {
-    dr_override_planepath = { static_cast<int>(0) };//{ 0,0 }; // works on windows... should "get" the second value first?
+    dr_override_planepath = { 0,0 }; // works on windows... should "get" the second value first?
     XPLMCheckMenuItem(myMenu, MENU_TOGGLE, xplm_Menu_Unchecked);
     infow->hideWindow();
     slewmode = false;
