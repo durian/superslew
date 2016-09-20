@@ -390,9 +390,9 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   G.prefsfilename = prefsfile;
   G.read_prefs(prefsfile);
 
-  if ( G.speed == 2 ) {
+  if ( G.speed == 1 ) {
     mult = maxi_mult;
-  } else if ( G.speed == 3 ) {
+  } else if ( G.speed == 2 ) {
     mult = warp_mult;
   }
   
@@ -626,21 +626,21 @@ void MyMenuHandlerCallback( void *inMenuRef, void *inItemRef) {
   }
   if ( (long)inItemRef == MENU_NORMAL ) {
     mult = mini_mult;
-    G.speed = 1;
+    G.speed = 0;
     XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Checked);
     XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Unchecked);
     XPLMCheckMenuItem(myMenu, MENU_WARP, xplm_Menu_Unchecked);
   }
   if ( (long)inItemRef == MENU_SPEED ) {
     mult = maxi_mult;
-    G.speed = 2;
+    G.speed = 1;
     XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Unchecked);
     XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Checked);
     XPLMCheckMenuItem(myMenu, MENU_WARP, xplm_Menu_Unchecked);
   }
   if ( (long)inItemRef == MENU_WARP ) {
     mult = warp_mult;
-    G.speed = 3;
+    G.speed = 2;
     XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Unchecked);
     XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Unchecked);
     XPLMCheckMenuItem(myMenu, MENU_WARP, xplm_Menu_Checked);
