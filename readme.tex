@@ -44,21 +44,21 @@
 \usepackage{setspace}
 %\onehalfspacing
 %\setstretch{1.16}%onehalf is 1.25/1.213/1.241 for 10/11/12 pt
-\setstretch{1.10}
+\setstretch{1.16}
 
 \usepackage{titlesec} % Allows creating custom \section's
 % Format of the section titles
 \titleformat{\section}{\color{headings}
 %\scshape%
 \descitemfont
-\Huge\raggedright}{}{0em}{}[\color{black}\titlerule]
-\titlespacing{\section}{0pt}{0pt}{5pt} % Spacing around titles
+\huge\raggedright}{}{0em}{}[\color{black}\titlerule]
+\titlespacing{\section}{0pt}{0pt}{\baselineskip} % Spacing around titles
 
 %\newfontfamily\subsubsectionfont[Color=MSLightBlue]{Times New Roman}
 % Set formats for each heading level
 %\titleformat*{\section}{\Large\bfseries\sffamily\color{MSBlue}}
 %\titleformat*{\subsection}{\large\bfseries\sffamily\color{MSLightBlue}}
-\titleformat*{\subsection}{\color{headings}}
+\titleformat*{\subsection}{\Large\color{headings}}
 
 
 \usepackage{enumitem}
@@ -81,10 +81,10 @@
 
 \begin{document}
 
-\section*{\Huge{\textbf{SuperSlew}}}
-\vspace{1cm}
+\section*{SuperSlew}
 
-Plugin that allows you to move your plane around without actually flying.
+Plugin that (a) allows you to move your plane around without actually
+flying, and (b) put your plane at specific latitude and longitude coordinates.
 
 \vspace{0.5\baselineskip}
 It needs X-Plane 10.40+, and works in 32 and 64 bits, on Linux, Mac
@@ -96,9 +96,7 @@ menu, and second, by binding a key or joystick button to the custom command
 defined by the plugin. The command is called
 \texttt{durian/superslew/toggle}. 
 
-\vspace{1cm}
-\section*{\Huge{\textbf{Installation}}}
-\vspace{1cm}
+\section*{Installation}
 
 The plugin is distributed as a zip file. The \texttt{superslew}
 directory and its contents, contained in the zip file, must be put in
@@ -106,27 +104,7 @@ the \texttt{Resources/plugins} directory which can be found in the
 main X-Plane directory. The directory containing the plugin
 \textsl{must} be called \texttt{superslew}. If installed correctly, a
 new menu item called ``SuperSlew'' will appear under the Plugins menu
-in X-Plane. This menu contains a number of items. The first one,
-called ``Slew Toggle'', switches the slew mode on or off. When
-enabled, a small windows containing information is shown in the bottow
-right corner of the screen. The following information is displayed.
-
-\begin{figure}[h!]%
-\centering
-\includegraphics[width=1.0\textwidth]{infowindow.png}
-\label{fig:infowindow}
-\end{figure}
-
-\vspace{1cm}
-\section*{\Huge{\textbf{Controls}}}
-\vspace{1cm}
-
-%explain modes first, and what is standard mode
-
-In standard mode, the plane can be moved around with the joystick
-and/or pedals. Moving the stick forward or backward will move the
-plane forward of backword. The speed at which you move is controlled
-by the throttle.
+in X-Plane. This menu contains the following items. 
 
 \begin{figure}[h!]%
 \centering
@@ -134,16 +112,102 @@ by the throttle.
 \label{fig:infowindow}
 \end{figure}
 
+The first menu item enables the Slew Mode. You can enable it when
+flying, but when you disable the plugin again, you will continue at
+the speed you had when you enabled it. This can lead to spectacular
+effects if you for example rotate your plane 180 degrees, and then
+continue. 
+
+If you enable it on the ground, you can ``drive'' around, and the
+plugin will keep the wheels of the plane on the ground.
+
+If you enable the Slew Mode before going into the local map view, you
+can move your plane around without crashing or ending up in the air
+when you exit the map.
+
+\subsection*{Menu Items}
+
+\begin{vlist}{w}
+
+\item[Toggle Slew Mode] Switches the slew mode on or
+off. When enabled, a small windows containing information is shown in
+the bottow right corner of the screen. 
+
+\item[Toggle Altitude Control] Enabling altitude control makes the
+  plane move up or down when you move the joystick to the right or
+  left. Note that you can not go below the altitude you were when you
+  enabled the SuperSlew Mode. This is to prevent disappearing under
+  ground. There is more information on how to control the plane in the
+  next section.
+
+\item[Toggle Orientation Control] This mode lets you control the
+  orientation of the plane. There is more information on how to
+  control the plane in the next section.
+
+\item[Scan Joysticks] Rescans the joysticks connected to the computer.
+
+\item[Reverse yaw] Reverses the orientation of the yaw (heading) control.
+
+\item[Goto Coordinates] Shows a dialog box in which you can enter a
+  latitude and longitude. Pressing goto will put your plane at the
+  specified coordinates.
+\begin{figure}[h!]%
+\centering
+\includegraphics[scale=1]{slewgoto.png}
+\label{fig:infowindow}
+\end{figure}
+Use a minus sign for coordinates to the west of Greenwhich or south
+of the equator. The coordinates need to be in decimal format, and the need
+to be seperated by a single space only. The screen shot shows a
+position in The Netherlands.
+
+\item[Maximum Speed 16 m/s] Full throttle will move your plane at this
+  speed. Different speed settings exists to allow better control. The
+  slowest setting is goot for taxiiing around the airport, with a
+  maximum speed of 31 knots.
+
+\item[Maximum Speed 256 m/s] Full throttle will move your plane at this
+  speed. 
+
+\item[Maximum Speed 1024 m/s] Full throttle will move your plane at this
+  speed. Moving very fast can cause the loading of the scenery to lag
+  behind. It will catch up again when you are stationary.
+
+\end{vlist}{}
+\section*{Controls}
+
+%explain modes first, and what is standard mode
+When you start the plugin for the first time, the plane can be moved
+around with the joystick and/or pedals. Moving the stick forward or
+backward will move the plane forward of backward. Moving the stick to
+the right or left moves your plane to the right or left.  The speed at
+which you move is controlled by the throttle.
+
 \vspace{0.5\baselineskip}
-Moving the stick to the right or left moves your plane to the right or
-left. If you select the ``Altitude Mode'' from the menu, your plane
-will be moved up or down instead. 
+You can rotate the plane with the pedals (or twist grip on your
+joystick). Speed of rotation is controlled by how much you move the
+pedals or stick.
+
+%\begin{figure}[h!]%
+%\centering
+%\includegraphics[width=1.0\textwidth]{infowindow.png}
+%\label{fig:infowindow}
+%\end{figure}
+
+\subsection*{Altitude control}
 
 \begin{figure}[h!]%
 \centering
 \includegraphics[scale=1]{slewaltitude.png}
 \label{fig:infowindow}
 \end{figure}
+
+Moving the stick to the right or left moves your plane to the right or
+left. If you select the ``Altitude Mode'' from the menu, your plane
+will be moved up or down instead. You can not go below the altitude
+your are at when you enable the plugin. This is to prevent
+disappearing under ground. As a consequence, you can not start the
+Slew Mode in the air and put your plane down on the ground.
 
 \vspace{0.5\baselineskip}
 You can rotate the plane with the pedals (or twist grip on your
