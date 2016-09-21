@@ -90,15 +90,25 @@ flying, and (b) put your plane at specific latitude and longitude coordinates.
 It needs X-Plane 10.40+, and works in 32 and 64 bits, on Linux, Mac
 and Windows.
 
+\vspace{\baselineskip}
 \section*{Installation}
 
 The plugin is distributed as a zip file. The \texttt{superslew}
 directory and its contents, contained in the zip file, must be put in
 the \texttt{Resources/plugins} directory which can be found in the
 main X-Plane directory. The directory containing the plugin
-\textsl{must} be called \texttt{superslew}. If installed correctly, a
-new menu item called ``SuperSlew'' will appear under the Plugins menu
-in X-Plane. This menu contains the following items. 
+\textsl{must} be called \texttt{superslew}. The directory structure
+looks like this on my Mac.
+
+\begin{figure}[h!]%
+\centering
+\includegraphics[scale=1]{slewinstall.png}
+\label{fig:slewinstall}
+\end{figure}
+
+If installed correctly, a new menu item called ``SuperSlew'' will
+appear under the Plugins menu in X-Plane. This menu contains the
+following items.
 
 \begin{figure}[h!]%
 \centering
@@ -131,7 +141,7 @@ automatically after the first time you run X-Plane with the plugin. The next
 time you start X-Plane, the settings will be read again. In version 0.93 of the
 plugin, the plugin saves the control and speed settings.
 
-\clearpage
+\vspace{\baselineskip}
 \section*{Menu Items}
 
 \begin{vlist}{w}
@@ -181,6 +191,8 @@ position in The Netherlands.
   behind. It will catch up again when you are stationary.
 
 \end{vlist}{}
+
+\clearpage
 \section*{Controls}
 
 %explain modes first, and what is standard mode
@@ -198,7 +210,7 @@ this case.
 \vspace{0.5\baselineskip}
 You can rotate the plane with the pedals (or twist grip on your
 joystick). Speed of rotation is controlled by how much you move the
-pedals or stick.
+pedals or twist the stick.
 
 \subsection*{Altitude and orientation control}
 
@@ -214,11 +226,6 @@ will be moved up or down instead. You can not go below the altitude
 your are at when you enable the plugin. This is to prevent
 disappearing under ground. As a consequence, you can not start the
 Slew Mode in the air and put your plane down on the ground.
-
-\vspace{0.5\baselineskip}
-You can rotate the plane with the pedals (or twist grip on your
-joystick). Speed of rotation is controlled by how much you move the
-pedals or twist the stick.
 
 \vspace{0.5\baselineskip}
 If you switch to ``Orientation Control'', you can change the pitch and
@@ -249,6 +256,7 @@ value between 0 and 1 for each axis.
 
 Note that closing the window disables the Slew Mode.
 
+\vspace{\baselineskip}
 \section*{Miscellaneous}
 
 This readme is for version 0.93. 
