@@ -56,7 +56,9 @@ namespace SUPERSLEW {
     bool altmode = false;
     bool orimode = false;
     int speed = 0;
-    
+	int window_x = -999;
+	int window_y = -999;
+	
     // Constructor.
     Global();
     
