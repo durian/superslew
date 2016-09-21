@@ -90,12 +90,6 @@ flying, and (b) put your plane at specific latitude and longitude coordinates.
 It needs X-Plane 10.40+, and works in 32 and 64 bits, on Linux, Mac
 and Windows.
 
-\vspace{0.5\baselineskip}
-The slew mode can be started and stopped in two ways. First, from the
-menu, and second, by binding a key or joystick button to the custom command
-defined by the plugin. The command is called
-\texttt{durian/superslew/toggle}. 
-
 \section*{Installation}
 
 The plugin is distributed as a zip file. The \texttt{superslew}
@@ -123,9 +117,21 @@ plugin will keep the wheels of the plane on the ground.
 
 If you enable the Slew Mode before going into the local map view, you
 can move your plane around without crashing or ending up in the air
-when you exit the map.
+when you exit the map. Altitude and orientation control both need to be off for
+this to work properly.
 
-\subsection*{Menu Items}
+The slew mode can be started and stopped in two ways. First, from the
+menu, and second, by binding a key or joystick button to the custom command
+defined by the plugin. The command is called
+\texttt{durian/superslew/toggle}. 
+
+The plugin will save your settings in a file called \texttt{superslew.ini}. This
+file can be found in the \texttt{superslew} directory. It is created
+automatically after the first time you run X-Plane with the plugin. The next
+time you start X-Plane, the settings will be read again. In version 0.93 of the
+plugin, the plugin saves the control and speed settings.
+
+\section*{Menu Items}
 
 \begin{vlist}{w}
 
@@ -163,7 +169,7 @@ position in The Netherlands.
 
 \item[Maximum Speed 16 m/s] Full throttle will move your plane at this
   speed. Different speed settings exists to allow better control. The
-  slowest setting is goot for taxiiing around the airport, with a
+  slowest setting is goot for taxiing around the airport, with a
   maximum speed of 31 knots.
 
 \item[Maximum Speed 256 m/s] Full throttle will move your plane at this
@@ -188,13 +194,7 @@ You can rotate the plane with the pedals (or twist grip on your
 joystick). Speed of rotation is controlled by how much you move the
 pedals or stick.
 
-%\begin{figure}[h!]%
-%\centering
-%\includegraphics[width=1.0\textwidth]{infowindow.png}
-%\label{fig:infowindow}
-%\end{figure}
-
-\subsection*{Altitude control}
+\subsection*{Altitude and orientation control}
 
 \begin{figure}[h!]%
 \centering
@@ -203,7 +203,7 @@ pedals or stick.
 \end{figure}
 
 Moving the stick to the right or left moves your plane to the right or
-left. If you select the ``Altitude Mode'' from the menu, your plane
+left. If you select the ``Altitude Control'' from the menu, your plane
 will be moved up or down instead. You can not go below the altitude
 your are at when you enable the plugin. This is to prevent
 disappearing under ground. As a consequence, you can not start the
@@ -212,12 +212,12 @@ Slew Mode in the air and put your plane down on the ground.
 \vspace{0.5\baselineskip}
 You can rotate the plane with the pedals (or twist grip on your
 joystick). Speed of rotation is controlled by how much you move the
-pedals or stick.
+pedals or twist the stick.
 
 \vspace{0.5\baselineskip}
-If you switch to ``Orientation Mode'', you can change the pitch and
+If you switch to ``Orientation Control'', you can change the pitch and
 roll with the joystick. The pedals still change the rotation. This
-mode disables the two other modes, so you have to disable it if you
+mode overrides the two other modes, so you have to disable it if you
 want to move position again.
 
 \begin{figure}[h!]%
@@ -226,7 +226,25 @@ want to move position again.
 \label{fig:infowindow}
 \end{figure}
 
-\vspace{0.5\baselineskip}
+\clearpage
+\section*{Info Window}
+
+The information window shows the following information. 
+
+\begin{figure}[h!]%
+\centering
+\includegraphics[width=1.0\textwidth]{infowindow.png}
+\label{fig:infowindow}
+\end{figure}
+
+The first line shows the joystick inputs. In resting state, the pitch, roll and
+heading values should be 0.50. In normal circumstances, X-Plane should provide a
+value between 0 and 1 for each axis.
+
+Note that closing the window disables the Slew Mode.
+
+\section*{Miscellaneous}
+
 This readme is for version 0.93. 
 
 \vspace{0.5\baselineskip} {\color{text1}This program is shareware. You may try
