@@ -83,6 +83,9 @@ namespace SUPERSLEW {
 
   // Default values if no config file found.
   Global::Global() {
+    speeds[0] =   16.0;
+    speeds[1] =  256.0;
+    speeds[2] = 1024.0;    
   }
 
   Global::~Global() {
@@ -100,6 +103,7 @@ namespace SUPERSLEW {
       }
       file << "altmode = 0" << std::endl;
       file << "orimode = 0" << std::endl;
+      file << "speeds = 16,256,1024" << std::endl;
       file << "speed = 0" << std::endl;
       file.close();
       return;
@@ -132,12 +136,34 @@ namespace SUPERSLEW {
 	  if ( lhs == "orimode" ) {
 	    int x = int(std::stoi(rhs));
 	    if ( x == 1 ) {
-	      G.orimode = true;
+	      orimode = true;
+	    }
+	  }
+	  if ( lhs == "speeds" ) {
+	    std::vector<std::string> bits;
+	    listify( rhs, bits );
+	    if ( bits.size() >= 3 ) {
+	      float s0 =   16.0; // y is under
+	      float s1 =  256.0; // z is behind
+	      float s2 = 1024.0; // z is behind
+	      try {
+		s0 = fabs(std::stof(bits[0]));
+		if ( s0 < 0.01 ) {
+		  s1 = 1.0;
+		}
+		s1 = fabs(std::stof(bits[1]));
+		s2 = fabs(std::stof(bits[2]));
+	      } catch (...) {
+		lg.xplm( "Can't read speeds values, using defaults.\n" );
+	      }
+	      speeds[0] = s0;
+	      speeds[1] = s1;
+	      speeds[2] = s2;
 	    }
 	  }
 	  if ( lhs == "speed" ) {
 	    int x = int(std::stoi(rhs));
-	    G.speed = x;
+	    speed = x;
 	  }
 	}
       }
@@ -162,6 +188,7 @@ namespace SUPERSLEW {
     } else {
       file << "0" << std::endl;
     }
+    file << "speeds = " << G.speeds[0] << "," << G.speeds[1] << "," << G.speeds[2] << std::endl;
     file << "speed = " << G.speed << std::endl;
     file.close();
     return;
@@ -194,8 +221,8 @@ namespace SUPERSLEW {
     std::generate_n( str.begin(), length, randchar );
     return str;
   }
-
-  FloatWindow *Global::create_fw(const std::string& id, const std::string& title, const std::string& msg0, const std::string& msg1) {
+  
+  FloatWindow *Global::create_fw(const std::string& id) {
     XPLMDataRef window_width_ref  = XPLMFindDataRef("sim/graphics/view/window_width");
     XPLMDataRef window_height_ref = XPLMFindDataRef("sim/graphics/view/window_height");
     
@@ -208,29 +235,36 @@ namespace SUPERSLEW {
     
     const int window_width = 320;
     const int window_height = 80;
-    
+
+    //  For X-Plane 8.10 and later, 0,0 is at the lower left corner of the screen.
+	 
+    int x, x2, y, y2;
+    // windw_x, window_y
+    if ( window_x < 0 ) {
+      x  = width - window_width - window_x;
+      x2 = width - window_x;
+    } else {
+      x  = window_x;
+      x2 = window_x + window_width;
+    }
+    if ( window_y < 0 ) {
+      y  = window_height - window_y; 
+      y2 = -window_y;
+    } else {
+      y2  = height - window_y - window_height;
+      y = height - window_y;
+    }
+    /*
     int x  = width - window_width - 4;   // width/2 - window_width / 2;
     int x2 = width - 4;                  //width/2 + window_width / 2;
     int y  = window_height + 4;          //height/2 + window_height / 2;
     int y2 = +4;                         //height/2 - window_height / 2;
+    */
     
-    FloatWindow *info_window = new FloatWindow(x, y, x2, y2, title, msg0, msg1);
+    FloatWindow *info_window = new FloatWindow(x, y, x2, y2, "", "", "");
     fwindows[id] = info_window;
     return info_window;
     // return this pointer too?
-  }
-
-  FloatWindow *Global::create_fw(const std::string& id, const std::string& title, const std::string& msg0, const std::string& msg1, int x, int y, float tmr) {
-    const int window_width = 320;
-    const int window_height = 80;
-    
-    // x,y are the top left of window
-    int x2 = x + window_width;
-    int y2 = y - window_height;
-    
-    FloatWindow *info_window = new FloatWindow(x, y, x2, y2, title, msg0, msg1, tmr);
-    fwindows[id] = info_window; // check if exists? then delete old one?
-    return info_window;
   }
 
   void Global::update_text(const std::string& id, const std::string& t) {

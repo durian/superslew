@@ -57,7 +57,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 
 using namespace SUPERSLEW;
 
-std::string VERSION = "0.93";
+std::string VERSION = "0.94";
 
 DataRef<int>    dr_sim_paused("sim/time/paused");
 DataRef<int>    dr_sim_speed("sim/time/sim_speed", ReadWrite);
@@ -84,12 +84,7 @@ Axis axis_y = {0, 0, 0};
 Axis axis_t = {0, 0, 0}; // throttle
 
 static bool slewmode = false;
-
-float mini_mult = 16.0; // this is m/s, at max throttle
-float maxi_mult = 16.0 * mini_mult; // 16*16 = 256 = ~500 kt
-float warp_mult =  4.0 * maxi_mult; // 4 * 500 = ~2000 kt
-float mult = mini_mult;
-
+float mult = 16.0;
 float yaw_reverse = 1.0; // set to -1.0 to reverse.
 
 DataRef<std::vector<int>> dr_override_planepath("sim/operation/override/override_planepath", ReadWrite); // ARRAY?
@@ -390,11 +385,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   G.prefsfilename = prefsfile;
   G.read_prefs(prefsfile);
 
-  if ( G.speed == 1 ) {
-    mult = maxi_mult;
-  } else if ( G.speed == 2 ) {
-    mult = warp_mult;
-  }
+  mult = G.speeds[G.speed];
   
   // First we put a new menu item into the plugin menu
   mySubMenuItem = XPLMAppendMenuItem(XPLMFindPluginsMenu(), // Plugins menu 
@@ -431,18 +422,18 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   XPLMCheckMenuItem(myMenu, MENU_YAWREVERSE, xplm_Menu_Unchecked);
   XPLMAppendMenuItem(myMenu, "Goto Coordinates",  (void*)MENU_GOTO, 1);
     
-  std::string tmp = "Maximum Speed "+padded_int(int(mini_mult), 4)+" m/s";
+  std::string tmp = "Maximum Speed "+padded_int(int(G.speeds[0]), 4)+" m/s";
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_NORMAL, 1); 
-  tmp = "Maximum Speed "+padded_int(int(maxi_mult), 4)+" m/s";
+  tmp = "Maximum Speed "+padded_int(int(G.speeds[1]), 4)+" m/s";
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_SPEED, 1); 
-  tmp = "Maximum Speed "+padded_int(int(warp_mult), 4)+" m/s";
+  tmp = "Maximum Speed "+padded_int(int(G.speeds[2]), 4)+" m/s";
   XPLMAppendMenuItem(myMenu, tmp.c_str(),  (void*)MENU_WARP, 1);
   XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Unchecked);
    XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Unchecked);
    XPLMCheckMenuItem(myMenu, MENU_WARP, xplm_Menu_Unchecked);
-   if ( mult == mini_mult ) {
+   if ( mult == G.speeds[0] ) {
      XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Checked);
-   } else if ( mult == maxi_mult ) {
+   } else if ( mult == G.speeds[1] ) {
      XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Checked);
    } else {
      XPLMCheckMenuItem(myMenu, MENU_WARP, xplm_Menu_Checked);
@@ -451,7 +442,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   XPLMRegisterFlightLoopCallback(DeferredInitNewAircraftFLCB, -1, NULL);
 
   std::string tmp0 = " Super Slew ";
-  infow = G.create_fw("01", "", tmp0, "");//, 40, 600); // use updateText
+  infow = G.create_fw("01");//, 40, 600); // use updateText
   infow->hideWindow();
 
   SlewCommand = XPLMCreateCommand("durian/superslew/toggle", "Toggle SuperSlew");
@@ -625,21 +616,21 @@ void MyMenuHandlerCallback( void *inMenuRef, void *inItemRef) {
     create_load_window(128, 600, 216, 88);
   }
   if ( (long)inItemRef == MENU_NORMAL ) {
-    mult = mini_mult;
+    mult = G.speeds[0];
     G.speed = 0;
     XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Checked);
     XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Unchecked);
     XPLMCheckMenuItem(myMenu, MENU_WARP, xplm_Menu_Unchecked);
   }
   if ( (long)inItemRef == MENU_SPEED ) {
-    mult = maxi_mult;
+    mult = G.speeds[1];
     G.speed = 1;
     XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Unchecked);
     XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Checked);
     XPLMCheckMenuItem(myMenu, MENU_WARP, xplm_Menu_Unchecked);
   }
   if ( (long)inItemRef == MENU_WARP ) {
-    mult = warp_mult;
+    mult = G.speeds[2];
     G.speed = 2;
     XPLMCheckMenuItem(myMenu, MENU_NORMAL, xplm_Menu_Unchecked);
     XPLMCheckMenuItem(myMenu, MENU_SPEED, xplm_Menu_Unchecked);
@@ -784,7 +775,7 @@ float MyFlightLoopCallback( float inElapsedSinceLastCall,
   
   // heading, we need a "reverse" option here.
   float h_norm = hdng - 0.50;
-  float h_inc = h_norm * 0.1 * mini_mult * yaw_reverse; // not too fast
+  float h_inc = h_norm * 0.1 * G.speeds[0] * yaw_reverse; // not too fast
 
   // HEADING works the same in both modes
   if ( fabs(h_norm) > 0.1 ) {

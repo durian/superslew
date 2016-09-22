@@ -56,9 +56,10 @@ namespace SUPERSLEW {
     bool altmode = false;
     bool orimode = false;
     int speed = 0;
-	int window_x = -999;
-	int window_y = -999;
-	
+    int window_x = 4;
+    int window_y = 4;
+    float speeds[3];
+    
     // Constructor.
     Global();
     
@@ -71,8 +72,7 @@ namespace SUPERSLEW {
     float random_range(float,float);
     std::string random_string(size_t);
 
-    FloatWindow *create_fw(const std::string&, const std::string&, const std::string&, const std::string&);
-    FloatWindow *create_fw(const std::string&, const std::string&, const std::string&, const std::string&, int, int, float);
+    FloatWindow *create_fw(const std::string&);
     void update_text(const std::string&, const std::string&);
     void delete_fwindows();
   };
