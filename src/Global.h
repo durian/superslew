@@ -56,8 +56,8 @@ namespace SUPERSLEW {
     bool altmode = false;
     bool orimode = false;
     int speed = 0;
-    int window_x = 4;
-    int window_y = 4;
+    int window_x = -4; // 297;//-4;
+    int window_y = -4; // 883; //-4;
     float speeds[3];
     
     // Constructor.

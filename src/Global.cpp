@@ -240,6 +240,8 @@ namespace SUPERSLEW {
 	 
     int x, x2, y, y2;
     // windw_x, window_y
+    // window_y includes menu, so it should not be less than 16 from top!
+    // 20160923 18:33:30.261: SLEW: WIN UP x=1175 y=882
     if ( window_x < 0 ) {
       x  = width - window_width - window_x;
       x2 = width - window_x;
@@ -251,8 +253,10 @@ namespace SUPERSLEW {
       y  = window_height - window_y; 
       y2 = -window_y;
     } else {
-      y2  = height - window_y - window_height;
-      y = height - window_y;
+      //y2 = height - window_y - window_height;
+      //y = height - window_y;
+      y = window_y;
+      y2 = window_y - window_height;
     }
     /*
     int x  = width - window_width - 4;   // width/2 - window_width / 2;

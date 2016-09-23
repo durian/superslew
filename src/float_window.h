@@ -49,7 +49,15 @@ namespace SUPERSLEW {
 	  return 0; // we can move window
 	}
 	*/
-	return 0; // don't move window
+	lg.xplm("WIN x="+std::to_string(mouse_info->x)+" y="+std::to_string(mouse_info->y)+"\n" );
+	return 0;
+      }
+      case xpMsg_MouseUp: {
+	XPGetWidgetGeometry(obj->info_window, &obj->drag_start_window_left, &obj->drag_start_window_top,
+			    &obj->drag_start_window_right, &obj->drag_start_window_bottom);
+	//lg.xplm("WIN UP x="+std::to_string(obj->drag_start_window_left)+" y="+std::to_string(obj->drag_start_window_top)+"\n" );
+	// save these in G, for config file... or get from G on save, we don't have G here.
+	return 0;
       }
 
       case xpMessage_CloseButtonPushed:
@@ -58,7 +66,7 @@ namespace SUPERSLEW {
 	lg.xplm("ping\n");
 	XPHideWidget(inWidget); // the question is how to get it back...
 
-	XPLMPluginID plugin_id = XPLMFindPluginBySignature("org.durian.groundcontrol");
+	XPLMPluginID plugin_id = XPLMFindPluginBySignature("org.durian.superslew");
 	if (XPLM_NO_PLUGIN_ID != plugin_id) {
 	  XPLMSendMessageToPlugin(plugin_id, MSG_END_SLEWMODE, (void*)"stop"); // is "stop" even needed?
 	}
