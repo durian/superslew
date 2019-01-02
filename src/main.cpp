@@ -1,7 +1,9 @@
 /*
-  (c) pjb 2013, 2014, 2015, 2016
-*/
+  (c) pjb 2013, 2014, 2015, 2016, 2017
 
+  0.95   2017-06-26 New version number, some cleanup.
+
+*/
 #if IBM
 #include <windows.h>
 BOOL APIENTRY DllMain( HANDLE hModule,
@@ -57,7 +59,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 
 using namespace SUPERSLEW;
 
-std::string VERSION = "0.94";
+std::string VERSION = "0.95";
 
 DataRef<int>    dr_sim_paused("sim/time/paused");
 DataRef<int>    dr_sim_speed("sim/time/sim_speed", ReadWrite);
@@ -74,10 +76,12 @@ typedef struct _Axis {
   double min;
   double max;
 } Axis;
+
 DataRef<std::vector<int>> dr_jsa_assignments("sim/joystick/joystick_axis_assignments"); // axis type  int[100]
 DataRef<std::vector<float>> dr_jsa_values("sim/joystick/joystick_axis_values"); // float[100]
 DataRef<std::vector<float>> dr_jsa_minimum("sim/joystick/joystick_axis_minimum"); // float[100]
 DataRef<std::vector<float>> dr_jsa_maximum("sim/joystick/joystick_axis_maximum"); // float[100]
+
 Axis axis_p = {0, 0, 0};
 Axis axis_r = {0, 0, 0};
 Axis axis_y = {0, 0, 0};
